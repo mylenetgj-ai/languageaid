@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharmacy – Language Aid – Part 1</title>
+<style>
+  :root {
+    --dark-blue: #19478C;
+    --light-blue: #3EB3E1;
+    --teal: #009CA2;
+    --white: #FFFFFF;
+    --bg: #F4F8FB;
+    --card-bg: #FFFFFF;
+    --text-main: #1a2a3a;
+    --text-muted: #5a6a7a;
+    --border: #d0e4f0;
+    --success: #28a745;
+    --warning: #f0a500;
+    --progress-bg: #e0eef5;
+    --shadow: 0 2px 12px rgba(25,71,140,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Tahoma, sans-serif; background: var(--bg); color: var(--text-main); min-height: 100vh; }
+
+  /* ===== HEADER ===== */
+  .site-header {
+    background: var(--dark-blue);
+    color: white;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 58px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(25,71,140,0.18);
+  }
+  .site-header .logo { font-size: 1rem; font-weight: bold; letter-spacing: 0.02em; display: flex; align-items: center; gap: 10px; }
+  .site-header .logo span.pill { background: var(--light-blue); color: white; border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; }
+  .header-nav { display: flex; align-items: center; gap: 10px; }
+  .btn-back {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: Tahoma, sans-serif;
+    font-size: 0.82rem;
+    transition: background 0.2s;
+  }
+  .btn-back:hover { background: rgba(255,255,255,0.25); }
+  .lang-badge { background: var(--teal); color: white; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; }
+
+  /* ===== PAGES ===== */
+  .page { display: none; min-height: calc(100vh - 58px); }
+  .page.active { display: block; }
+
+  /* ===== LANDING ===== */
+  #page-landing {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: linear-gradient(160deg, #e8f4fb 0%, #f4f8fb 60%, #e0f5f5 100%);
+    min-height: calc(100vh - 58px);
+  }
+  #page-landing.active { display: flex; }
+  .landing-icon { width: 72px; height: 72px; background: var(--dark-blue); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .landing-icon svg { width: 40px; height: 40px; fill: white; }
+  .landing-title { font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: bold; color: var(--dark-blue); line-height: 1.2; margin-bottom: 0.5rem; }
+  .landing-sub { font-size: 1rem; color: var(--text-muted); margin-bottom: 2.5rem; }
+  .landing-prompt { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .lang-buttons { display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+  .btn-lang {
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: var(--radius);
+    font-family: Tahoma, sans-serif;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow);
+  }
+  .btn-lang:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(25,71,140,0.18); }
+  .btn-lang.mandarin { background: var(--dark-blue); color: white; }
+  .btn-lang.malay { background: var(--teal); color: white; }
+  .landing-note { margin-top: 2.5rem; font-size: 0.78rem; color: var(--text-muted); max-width: 380px; line-height: 1.6; }
+
+  /* ===== MODULE OVERVIEW ===== */
+  #page-modules { padding: 2rem 1.5rem; }
+  .page-heading { margin-bottom: 1.8rem; }
+  .page-heading h2 { font-size: 1.4rem; color: var(--dark-blue); font-weight: bold; }
+  .page-heading p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+  .modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; }
+  .module-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.3rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .module-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(25,71,140,0.13); border-color: var(--light-blue); }
+  .module-card-header { display: flex; align-items: flex-start; gap: 12px; }
+  .module-num { width: 38px; height: 38px; background: var(--dark-blue); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; flex-shrink: 0; }
+  .module-info h3 { font-size: 0.98rem; font-weight: bold; color: var(--text-main); }
+  .module-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+  .module-status { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+  .status-not-started { background: #f0f0f0; color: #888; }
+  .status-in-progress { background: #fff3cd; color: #b07800; }
+  .status-completed { background: #d4edda; color: #1a6e2e; }
+  .progress-bar-wrap { background: var(--progress-bg); border-radius: 10px; height: 6px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--light-blue), var(--teal)); transition: width 0.5s ease; }
+
+  /* ===== LEARN PAGE ===== */
+  #page-learn { padding: 2rem 1.5rem; max-width: 800px; margin: 0 auto; }
+  .learn-header { margin-bottom: 1.5rem; }
+  .learn-header h2 { font-size: 1.3rem; color: var(--dark-blue); font-weight: bold; }
+  .learn-header p { color: var(--text-muted); font-size: 0.88rem; margin-top: 3px; }
+  .phrase-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .phrase-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 4px rgba(25,71,140,0.05);
+  }
+  .phrase-index { width: 28px; height: 28px; background: var(--bg); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; color: var(--text-muted); flex-shrink: 0; }
+  .phrase-content { flex: 1; min-width: 0; }
+  .phrase-english { font-size: 0.92rem; font-weight: bold; color: var(--text-main); }
+  .phrase-foreign { font-size: 0.95rem; color: var(--dark-blue); margin-top: 3px; }
+  .phrase-romanized { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; font-style: italic; }
+  .btn-audio {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--light-blue);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-audio:hover { background: var(--dark-blue); transform: scale(1.08); }
+  .btn-audio svg { width: 16px; height: 16px; fill: white; }
+  .btn-audio.playing { background: var(--teal); }
+
+  .learn-actions { margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--dark-blue);
+    color: white; border: none;
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius-sm);
+    font-family: Tahoma, sans-serif;
+    font-size: 0.92rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: #123670; }
+  .btn-secondary {
+    background: white;
+    color: var(--dark-blue);
+    border: 1.5px solid var(--dark-blue);
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius-sm);
+    font-family: Tahoma, sans-serif;
+    font-size: 0.92rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-secondary:hover { background: var(--bg); }
+
+  /* Subsections for Conditions */
+  .subsection-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--teal);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 6px;
+    margin: 1.5rem 0 0.8rem;
+  }
+
+  /* ===== QUIZ ===== */
+  #page-quiz { padding: 2rem 1.5rem; max-width: 700px; margin: 0 auto; }
+  .quiz-header { margin-bottom: 1.5rem; }
+  .quiz-header h2 { font-size: 1.3rem; color: var(--dark-blue); font-weight: bold; }
+  .quiz-progress-row { display: flex; align-items: center; gap: 12px; margin-top: 0.8rem; }
+  .quiz-progress-wrap { flex: 1; background: var(--progress-bg); border-radius: 10px; height: 8px; overflow: hidden; }
+  .quiz-progress-fill { height: 100%; background: linear-gradient(90deg, var(--light-blue), var(--teal)); border-radius: 10px; transition: width 0.4s; }
+  .quiz-count-label { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
+
+  .quiz-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.8rem;
+    box-shadow: var(--shadow);
+  }
+  .quiz-question-type { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem; }
+  .quiz-question { font-size: 1rem; font-weight: bold; color: var(--text-main); margin-bottom: 0.5rem; line-height: 1.5; }
+  .quiz-foreign { font-size: 1.2rem; color: var(--dark-blue); margin-bottom: 1.2rem; }
+  .quiz-audio-btn {
+    background: var(--light-blue);
+    border: none;
+    border-radius: 30px;
+    padding: 0.6rem 1.5rem;
+    color: white;
+    font-family: Tahoma, sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1.2rem;
+    transition: background 0.2s;
+  }
+  .quiz-audio-btn:hover { background: var(--dark-blue); }
+  .quiz-audio-btn svg { width: 16px; height: 16px; fill: white; }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.7rem; }
+  .quiz-option {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    font-family: Tahoma, sans-serif;
+    font-size: 0.92rem;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+    color: var(--text-main);
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--light-blue); background: #eaf5fb; }
+  .quiz-option.correct { background: #d4edda; border-color: #28a745; color: #1a5c2a; font-weight: bold; }
+  .quiz-option.incorrect { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+  .quiz-option.reveal { background: #d4edda; border-color: #28a745; color: #1a5c2a; }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-feedback { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-size: 0.9rem; display: none; }
+  .quiz-feedback.correct { background: #d4edda; color: #1a5c2a; display: block; }
+  .quiz-feedback.incorrect { background: #f8d7da; color: #721c24; display: block; }
+  .btn-next-q {
+    margin-top: 1.2rem;
+    background: var(--dark-blue);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.8rem;
+    border-radius: var(--radius-sm);
+    font-family: Tahoma, sans-serif;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: none;
+  }
+  .btn-next-q:hover { background: #123670; }
+
+  /* Results */
+  #page-results { display: none; padding: 2rem 1.5rem; max-width: 600px; margin: 0 auto; text-align: center; }
+  #page-results.active { display: block; }
+  .results-icon { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem; font-size: 2rem; }
+  .results-icon.pass { background: #d4edda; }
+  .results-icon.fail { background: #f8d7da; }
+  .results-title { font-size: 1.5rem; font-weight: bold; color: var(--dark-blue); margin-bottom: 0.4rem; }
+  .results-score { font-size: 3rem; font-weight: bold; color: var(--dark-blue); margin: 1rem 0; }
+  .results-score span { font-size: 1.2rem; color: var(--text-muted); }
+  .results-message { color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; }
+  .results-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 500px) {
+    .phrase-card { flex-wrap: wrap; }
+    .btn-audio { align-self: flex-end; }
+    .lang-buttons { flex-direction: column; align-items: center; }
+    .btn-lang { width: 200px; }
+    #page-learn, #page-quiz, #page-results { padding: 1.2rem 1rem; }
+    #page-modules { padding: 1.2rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="white"/>
+      <path d="M9 7h2v1H9zm4 0h2v1h-2z" fill="white"/>
+    </svg>
+    Pharmacy – Language Aid
+    <span class="pill">Part 1</span>
+  </div>
+  <div class="header-nav" id="header-nav">
+    <!-- dynamic -->
+  </div>
+</header>
+
+<!-- PAGE: LANDING -->
+<div class="page active" id="page-landing">
+  <div class="landing-icon">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+    </svg>
+  </div>
+  <h1 class="landing-title">Pharmacy<br>Language Aid</h1>
+  <p class="landing-sub">A communication tool for pharmacists &amp; patients</p>
+  <p class="landing-prompt">Select your language</p>
+  <div class="lang-buttons">
+    <button class="btn-lang mandarin" onclick="selectLanguage('mandarin')">普通话 Mandarin</button>
+    <button class="btn-lang malay" onclick="selectLanguage('malay')">Bahasa Melayu</button>
+  </div>
+  <p class="landing-note">Progress is saved automatically in your browser. No account or internet required.</p>
+</div>
+
+<!-- PAGE: MODULES -->
+<div class="page" id="page-modules">
+  <div style="padding: 2rem 1.5rem;">
+    <div class="page-heading">
+      <h2 id="modules-title">Learning Modules</h2>
+      <p id="modules-sub">Select a module to begin</p>
+    </div>
+    <div class="modules-grid" id="modules-grid"></div>
+  </div>
+</div>
+
+<!-- PAGE: LEARN -->
+<div class="page" id="page-learn">
+  <div class="learn-header">
+    <h2 id="learn-title">Module</h2>
+    <p id="learn-desc">Study each phrase below</p>
+  </div>
+  <div class="phrase-list" id="phrase-list"></div>
+  <div class="learn-actions">
+    <button class="btn-primary" onclick="goToQuiz()">Take Quiz &rarr;</button>
+    <button class="btn-secondary" onclick="showPage('page-modules')">Back to Modules</button>
+  </div>
+</div>
+
+<!-- PAGE: QUIZ -->
+<div class="page" id="page-quiz">
+  <div class="quiz-header">
+    <h2 id="quiz-title">Quiz</h2>
+    <div class="quiz-progress-row">
+      <div class="quiz-progress-wrap"><div class="quiz-progress-fill" id="quiz-prog-fill" style="width:0%"></div></div>
+      <span class="quiz-count-label" id="quiz-count-lbl">0 / 10</span>
+    </div>
+  </div>
+  <div class="quiz-card" id="quiz-card">
+    <div class="quiz-question-type" id="q-type-label">Multiple Choice</div>
+    <div class="quiz-question" id="q-question"></div>
+    <div class="quiz-foreign" id="q-foreign"></div>
+    <button class="quiz-audio-btn" id="q-audio-btn" onclick="playQuizAudio()" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+      Play Audio
+    </button>
+    <div class="quiz-options" id="q-options"></div>
+    <div class="quiz-feedback" id="q-feedback"></div>
+    <button class="btn-next-q" id="btn-next-q" onclick="nextQuestion()">Next Question &rarr;</button>
+  </div>
+</div>
+
+<!-- PAGE: RESULTS -->
+<div class="page" id="page-results">
+  <div class="results-icon" id="results-icon">🎉</div>
+  <div class="results-title" id="results-title">Quiz Complete!</div>
+  <div class="results-score" id="results-score">8<span> / 10</span></div>
+  <p class="results-message" id="results-message"></p>
+  <div class="results-actions">
+    <button class="btn-primary" onclick="retryQuiz()">Retry Quiz</button>
+    <button class="btn-secondary" onclick="showPage('page-modules')">Back to Modules</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const CONTENT = {
+  mandarin: {
+    name: 'Mandarin',
+    label: '普通话',
+    modules: [
+      {
+        id: 'greetings',
+        title: 'Greetings',
+        titleForeign: '问候语',
+        desc: '7 common greetings',
+        items: [
+          { en: 'Good morning', foreign: '早上好', roman: 'Zǎoshang hǎo' },
+          { en: 'Good afternoon', foreign: '下午好', roman: 'Xiàwǔ hǎo' },
+          { en: 'Good evening', foreign: '晚上好', roman: 'Wǎnshang hǎo' },
+          { en: 'Hi, what can I help you with?', foreign: '您好，有什么可以帮您？', roman: 'Nín hǎo, yǒu shénme kěyǐ bāng nín?' },
+          { en: 'May I have your name & NRIC number?', foreign: '请问您的姓名和身份证号码是多少？', roman: 'Qǐngwèn nín de xìngmíng hé shēnfènzhèng hàomǎ shì duōshao?' },
+          { en: 'Do you have any allergies?', foreign: '您有任何过敏吗？', roman: 'Nín yǒu rènhé guòmǐn ma?' },
+          { en: 'Please take a seat and wait for the same queue number.', foreign: '请先坐下，等候相同号码叫到。', roman: 'Qǐng xiān zuò xia, děnghòu xiāngtóng hàomǎ jiào dào.' },
+          { en: 'Thank you.', foreign: '谢谢。', roman: 'Xièxiè.' },
+        ]
+      },
+      {
+        id: 'numbers',
+        title: 'Numbers (1–20)',
+        titleForeign: '数字 (1–20)',
+        desc: 'Numbers one to twenty',
+        items: [
+          { en: 'One', foreign: '一', roman: 'Yī' },
+          { en: 'Two', foreign: '二', roman: 'Èr' },
+          { en: 'Three', foreign: '三', roman: 'Sān' },
+          { en: 'Four', foreign: '四', roman: 'Sì' },
+          { en: 'Five', foreign: '五', roman: 'Wǔ' },
+          { en: 'Six', foreign: '六', roman: 'Liù' },
+          { en: 'Seven', foreign: '七', roman: 'Qī' },
+          { en: 'Eight', foreign: '八', roman: 'Bā' },
+          { en: 'Nine', foreign: '九', roman: 'Jiǔ' },
+          { en: 'Ten', foreign: '十', roman: 'Shí' },
+          { en: 'Eleven', foreign: '十一', roman: 'Shíyī' },
+          { en: 'Twelve', foreign: '十二', roman: 'Shí\'èr' },
+          { en: 'Thirteen', foreign: '十三', roman: 'Shísān' },
+          { en: 'Fourteen', foreign: '十四', roman: 'Shísì' },
+          { en: 'Fifteen', foreign: '十五', roman: 'Shíwǔ' },
+          { en: 'Sixteen', foreign: '十六', roman: 'Shíliù' },
+          { en: 'Seventeen', foreign: '十七', roman: 'Shíqī' },
+          { en: 'Eighteen', foreign: '十八', roman: 'Shíbā' },
+          { en: 'Nineteen', foreign: '十九', roman: 'Shíjiǔ' },
+          { en: 'Twenty', foreign: '二十', roman: 'Èrshí' },
+        ]
+      },
+      {
+        id: 'frequency',
+        title: 'Frequency & Duration',
+        titleForeign: '频率与时间',
+        desc: '13 time & frequency terms',
+        items: [
+          { en: 'Morning', foreign: '早上', roman: 'Zǎoshang' },
+          { en: 'Afternoon', foreign: '下午', roman: 'Xiàwǔ' },
+          { en: 'Evening', foreign: '傍晚', roman: 'Bàngwǎn' },
+          { en: 'Night', foreign: '晚上', roman: 'Wǎnshang' },
+          { en: 'Day', foreign: '天', roman: 'Tiān' },
+          { en: 'Hour', foreign: '小时', roman: 'Xiǎoshí' },
+          { en: 'Week', foreign: '星期', roman: 'Xīngqī' },
+          { en: 'Month', foreign: '月', roman: 'Yuè' },
+          { en: 'Year', foreign: '年', roman: 'Nián' },
+          { en: 'Half', foreign: '半', roman: 'Bàn' },
+          { en: 'Alternate day', foreign: '隔天', roman: 'Gé tiān' },
+          { en: 'Before food', foreign: '饭前', roman: 'Fàn qián' },
+          { en: 'After food', foreign: '饭后', roman: 'Fàn hòu' },
+        ]
+      },
+      {
+        id: 'dispensing',
+        title: 'Dispensing Phrases',
+        titleForeign: '配药用语',
+        desc: '13 common dispensing phrases',
+        items: [
+          { en: 'Your medication is ready.', foreign: '您的药准备好了。', roman: 'Nín de yào zhǔnbèi hǎo le.' },
+          { en: 'Take one tablet once a day.', foreign: '每天服用一片。', roman: 'Měitiān fúyòng yī piàn.' },
+          { en: 'Take two tablets twice a day.', foreign: '每天服用两次，每次两片。', roman: 'Měitiān fúyòng liǎng cì, měi cì liǎng piàn.' },
+          { en: 'Take this medicine with water.', foreign: '请用水服用此药。', roman: 'Qǐng yòng shuǐ fúyòng cǐ yào.' },
+          { en: 'Take this medicine after food.', foreign: '请在饭后服用此药。', roman: 'Qǐng zài fàn hòu fúyòng cǐ yào.' },
+          { en: 'Take this medicine before food.', foreign: '请在饭前服用此药。', roman: 'Qǐng zài fàn qián fúyòng cǐ yào.' },
+          { en: 'Do not exceed the recommended dose.', foreign: '请勿超过建议剂量。', roman: 'Qǐng wù chāoguò jiànyì jìliàng.' },
+          { en: 'Store in a cool dry place.', foreign: '请存放在阴凉干燥处。', roman: 'Qǐng cúnfàng zài yīnliáng gānzào chù.' },
+          { en: 'Keep out of reach of children.', foreign: '请放在儿童无法触及之处。', roman: 'Qǐng fàng zài értóng wúfǎ chùjí zhī chù.' },
+          { en: 'This medication may cause drowsiness.', foreign: '此药可能引起嗜睡。', roman: 'Cǐ yào kěnéng yǐnqǐ shìshuì.' },
+          { en: 'Avoid alcohol while on this medication.', foreign: '服用此药期间请勿饮酒。', roman: 'Fúyòng cǐ yào qījiān qǐng wù yǐn jiǔ.' },
+          { en: 'Please complete the full course.', foreign: '请完成整个疗程。', roman: 'Qǐng wánchéng zhěnggè liáochéng.' },
+          { en: 'Return for a follow-up if symptoms persist.', foreign: '如症状持续，请复诊。', roman: 'Rú zhèngzhuàng chíxù, qǐng fùzhěn.' },
+        ]
+      },
+      {
+        id: 'conditions',
+        title: 'Conditions',
+        titleForeign: '病症',
+        desc: 'Common medical conditions A–Z',
+        subsections: [
+          {
+            letter: 'A',
+            items: [
+              { en: 'Acne', foreign: '青春痘', roman: 'Qīngchūn dòu' },
+              { en: 'Allergic Rhinitis', foreign: '过敏性鼻炎', roman: 'Guòmǐn xìng bí yán' },
+              { en: 'Anaemia', foreign: '贫血', roman: 'Pín xuè' },
+              { en: 'Anxiety Disorder', foreign: '焦虑症', roman: 'Jiāo lǜ zhèng' },
+              { en: 'Asthma', foreign: '哮喘', roman: 'Xiào chuǎn' },
+            ]
+          },
+          {
+            letter: 'B',
+            items: [
+              { en: 'Benign Prostatic Hyperplasia', foreign: '良性前列腺增生', roman: 'Liáng xìng qián liè xiàn zēng shēng' },
+            ]
+          },
+          {
+            letter: 'C',
+            items: [
+              { en: 'Cellulitis', foreign: '蜂窝织炎', roman: 'Fēng wō zhī yán' },
+              { en: 'Chickenpox', foreign: '水痘', roman: 'Shuǐ dòu' },
+              { en: 'Cholesterol (High)', foreign: '高胆固醇', roman: 'Gāo dǎn gù chún' },
+              { en: 'Common Cold', foreign: '感冒', roman: 'Gǎn mào' },
+              { en: 'Conjunctivitis', foreign: '红眼症', roman: 'Hóng yǎn zhèng' },
+              { en: 'Constipation', foreign: '便秘', roman: 'Biàn mì' },
+            ]
+          },
+          {
+            letter: 'D',
+            items: [
+              { en: 'Depression', foreign: '抑郁症', roman: 'Yì yù zhèng' },
+              { en: 'Diabetes Mellitus', foreign: '糖尿病', roman: 'Táng niào bìng' },
+              { en: 'Diarrhoea', foreign: '腹泻', roman: 'Fù xiè' },
+              { en: 'Dry Eyes', foreign: '干眼症', roman: 'Gān yǎn zhèng' },
+            ]
+          },
+          {
+            letter: 'E',
+            items: [
+              { en: 'Eczema', foreign: '湿疹', roman: 'Shī zhěn' },
+            ]
+          },
+          {
+            letter: 'G',
+            items: [
+              { en: 'Gastritis', foreign: '胃炎', roman: 'Wèi yán' },
+              { en: 'Gout', foreign: '痛风', roman: 'Tòng fēng' },
+            ]
+          },
+          {
+            letter: 'H',
+            items: [
+              { en: 'Haemorrhoids', foreign: '痔疮', roman: 'Zhì chuāng' },
+              { en: 'Hand, Foot and Mouth Disease', foreign: '手足口病', roman: 'Shǒu zú kǒu bìng' },
+              { en: 'Heart Disease', foreign: '心脏病', roman: 'Xīn zàng bìng' },
+              { en: 'Hypertension / High Blood Pressure', foreign: '高血压', roman: 'Gāo xuè yā' },
+            ]
+          },
+          {
+            letter: 'M',
+            items: [
+              { en: 'Menopause', foreign: '更年期', roman: 'Gēng nián qī' },
+              { en: 'Menstrual Disorders', foreign: '月经失调', roman: 'Yuè jīng shī tiáo' },
+            ]
+          },
+          {
+            letter: 'O',
+            items: [
+              { en: 'Oral Thrush', foreign: '口腔念珠菌病', roman: 'Kǒu qiāng niàn zhū jūn bìng' },
+              { en: 'Osteoporosis', foreign: '骨质疏松症', roman: 'Gǔ zhì shū sōng zhèng' },
+            ]
+          },
+          {
+            letter: 'P',
+            items: [
+              { en: 'Psoriasis', foreign: '银屑病', roman: 'Yín xiè bìng' },
+            ]
+          },
+          {
+            letter: 'S',
+            items: [
+              { en: 'Scabies', foreign: '疥癣', roman: 'Jiè xuǎn' },
+              { en: 'Shingles', foreign: '带状疱疹', roman: 'Dài zhuàng pào zhěn' },
+              { en: 'Skin Fungal Infection', foreign: '皮肤真菌感染', roman: 'Pí fū zhēn jūn gǎn rǎn' },
+              { en: 'Stroke', foreign: '中风', roman: 'Zhòng fēng' },
+            ]
+          },
+          {
+            letter: 'T',
+            items: [
+              { en: 'Tension Headache', foreign: '紧张性头痛', roman: 'Jǐn zhāng xìng tóu tòng' },
+              { en: 'Thyroid Disorder', foreign: '甲状腺疾病', roman: 'Jiǎ zhuàng xiàn jí bìng' },
+            ]
+          },
+          {
+            letter: 'U',
+            items: [
+              { en: 'Upper Respiratory Tract Infection (URTI)', foreign: '上呼吸道感染', roman: 'Shàng hū xī dào gǎn rǎn' },
+              { en: '– Sore Throat', foreign: '喉咙痛', roman: 'Hóu lóng tòng' },
+              { en: '– Cough', foreign: '咳嗽', roman: 'Ké sou' },
+              { en: '– Runny Nose', foreign: '流鼻涕', roman: 'Liú bí tì' },
+              { en: '– Nose Congestion', foreign: '鼻塞', roman: 'Bí sāi' },
+              { en: 'Urinary Tract Infection', foreign: '尿道感染', roman: 'Niào dào gǎn rǎn' },
+              { en: 'Urticaria / Hives', foreign: '风疹', roman: 'Fēng zhěn' },
+            ]
+          },
+          {
+            letter: 'V',
+            items: [
+              { en: 'Varicose Veins', foreign: '静脉曲张', roman: 'Jìng mài qū zhāng' },
+              { en: 'Vertigo', foreign: '眩晕', roman: 'Xuàn yūn' },
+            ]
+          },
+          {
+            letter: 'W',
+            items: [
+              { en: 'Warts', foreign: '疣', roman: 'Yóu' },
+            ]
+          },
+        ]
+      },
+    ]
+  },
+  malay: {
+    name: 'Malay',
+    label: 'Bahasa Melayu',
+    modules: [
+      {
+        id: 'greetings',
+        title: 'Greetings',
+        titleForeign: 'Ucapan',
+        desc: '8 common greetings',
+        items: [
+          { en: 'Good morning', foreign: 'Selamat pagi', roman: '' },
+          { en: 'Good afternoon', foreign: 'Selamat tengah hari', roman: '' },
+          { en: 'Good evening', foreign: 'Selamat petang', roman: '' },
+          { en: 'Hi, what can I help you with?', foreign: 'Hai, ada apa yang boleh saya bantu?', roman: '' },
+          { en: 'May I have your name & NRIC number?', foreign: 'Boleh saya dapatkan nama dan nombor IC anda?', roman: '' },
+          { en: 'Do you have any allergies?', foreign: 'Adakah anda mempunyai sebarang alahan?', roman: '' },
+          { en: 'Please take a seat and wait for the same queue number.', foreign: 'Sila duduk dan tunggu nombor giliran yang sama dipanggil.', roman: '' },
+          { en: 'Thank you.', foreign: 'Terima kasih.', roman: '' },
+        ]
+      },
+      {
+        id: 'numbers',
+        title: 'Numbers (1–20)',
+        titleForeign: 'Nombor (1–20)',
+        desc: 'Numbers one to twenty',
+        items: [
+          { en: 'One', foreign: 'Satu', roman: '' },
+          { en: 'Two', foreign: 'Dua', roman: '' },
+          { en: 'Three', foreign: 'Tiga', roman: '' },
+          { en: 'Four', foreign: 'Empat', roman: '' },
+          { en: 'Five', foreign: 'Lima', roman: '' },
+          { en: 'Six', foreign: 'Enam', roman: '' },
+          { en: 'Seven', foreign: 'Tujuh', roman: '' },
+          { en: 'Eight', foreign: 'Lapan', roman: '' },
+          { en: 'Nine', foreign: 'Sembilan', roman: '' },
+          { en: 'Ten', foreign: 'Sepuluh', roman: '' },
+          { en: 'Eleven', foreign: 'Sebelas', roman: '' },
+          { en: 'Twelve', foreign: 'Dua belas', roman: '' },
+          { en: 'Thirteen', foreign: 'Tiga belas', roman: '' },
+          { en: 'Fourteen', foreign: 'Empat belas', roman: '' },
+          { en: 'Fifteen', foreign: 'Lima belas', roman: '' },
+          { en: 'Sixteen', foreign: 'Enam belas', roman: '' },
+          { en: 'Seventeen', foreign: 'Tujuh belas', roman: '' },
+          { en: 'Eighteen', foreign: 'Lapan belas', roman: '' },
+          { en: 'Nineteen', foreign: 'Sembilan belas', roman: '' },
+          { en: 'Twenty', foreign: 'Dua puluh', roman: '' },
+        ]
+      },
+      {
+        id: 'frequency',
+        title: 'Frequency & Duration',
+        titleForeign: 'Kekerapan & Tempoh',
+        desc: '13 time & frequency terms',
+        items: [
+          { en: 'Morning', foreign: 'Pagi', roman: '' },
+          { en: 'Afternoon', foreign: 'Tengah hari', roman: '' },
+          { en: 'Evening', foreign: 'Petang', roman: '' },
+          { en: 'Night', foreign: 'Malam', roman: '' },
+          { en: 'Day', foreign: 'Hari', roman: '' },
+          { en: 'Hour', foreign: 'Jam', roman: '' },
+          { en: 'Week', foreign: 'Minggu', roman: '' },
+          { en: 'Month', foreign: 'Bulan', roman: '' },
+          { en: 'Year', foreign: 'Tahun', roman: '' },
+          { en: 'Half', foreign: 'Separuh', roman: '' },
+          { en: 'Alternate day', foreign: 'Sehari sekali (berselang)', roman: '' },
+          { en: 'Before food', foreign: 'Sebelum makan', roman: '' },
+          { en: 'After food', foreign: 'Selepas makan', roman: '' },
+        ]
+      },
+      {
+        id: 'dispensing',
+        title: 'Dispensing Phrases',
+        titleForeign: 'Frasa Pengeluaran Ubat',
+        desc: '13 common dispensing phrases',
+        items: [
+          { en: 'Your medication is ready.', foreign: 'Ubat anda sudah siap.', roman: '' },
+          { en: 'Take one tablet once a day.', foreign: 'Ambil satu tablet sekali sehari.', roman: '' },
+          { en: 'Take two tablets twice a day.', foreign: 'Ambil dua tablet dua kali sehari.', roman: '' },
+          { en: 'Take this medicine with water.', foreign: 'Ambil ubat ini dengan air.', roman: '' },
+          { en: 'Take this medicine after food.', foreign: 'Ambil ubat ini selepas makan.', roman: '' },
+          { en: 'Take this medicine before food.', foreign: 'Ambil ubat ini sebelum makan.', roman: '' },
+          { en: 'Do not exceed the recommended dose.', foreign: 'Jangan melebihi dos yang disyorkan.', roman: '' },
+          { en: 'Store in a cool dry place.', foreign: 'Simpan di tempat yang sejuk dan kering.', roman: '' },
+          { en: 'Keep out of reach of children.', foreign: 'Jauhkan daripada kanak-kanak.', roman: '' },
+          { en: 'This medication may cause drowsiness.', foreign: 'Ubat ini mungkin menyebabkan mengantuk.', roman: '' },
+          { en: 'Avoid alcohol while on this medication.', foreign: 'Elakkan alkohol semasa mengambil ubat ini.', roman: '' },
+          { en: 'Please complete the full course.', foreign: 'Sila habiskan keseluruhan kursus rawatan.', roman: '' },
+          { en: 'Return for a follow-up if symptoms persist.', foreign: 'Datang semula untuk susulan jika gejala berterusan.', roman: '' },
+        ]
+      },
+      {
+        id: 'conditions',
+        title: 'Conditions',
+        titleForeign: 'Keadaan Penyakit',
+        desc: 'Common medical conditions A–Z',
+        subsections: [
+          {
+            letter: 'A',
+            items: [
+              { en: 'Acne', foreign: 'Jerawat', roman: '' },
+              { en: 'Allergic Rhinitis', foreign: 'Rinitis alergik', roman: '' },
+              { en: 'Anaemia', foreign: 'Anemia', roman: '' },
+              { en: 'Anxiety Disorder', foreign: 'Gangguan kegelisahan', roman: '' },
+              { en: 'Asthma', foreign: 'Semput', roman: '' },
+            ]
+          },
+          {
+            letter: 'B',
+            items: [
+              { en: 'Benign Prostatic Hyperplasia', foreign: 'Pembesaran prostat jinak', roman: '' },
+            ]
+          },
+          {
+            letter: 'C',
+            items: [
+              { en: 'Cellulitis', foreign: 'Selulitis', roman: '' },
+              { en: 'Chickenpox', foreign: 'Cacar air', roman: '' },
+              { en: 'Cholesterol (High)', foreign: 'Kolesterol tinggi', roman: '' },
+              { en: 'Common Cold', foreign: 'Selesema', roman: '' },
+              { en: 'Conjunctivitis', foreign: 'Konjunktivitis', roman: '' },
+              { en: 'Constipation', foreign: 'Sembelit', roman: '' },
+            ]
+          },
+          {
+            letter: 'D',
+            items: [
+              { en: 'Depression', foreign: 'Kemurungan', roman: '' },
+              { en: 'Diabetes Mellitus', foreign: 'Kencing Manis', roman: '' },
+              { en: 'Diarrhoea', foreign: 'Cirit-birit', roman: '' },
+              { en: 'Dry Eyes', foreign: 'Mata kering', roman: '' },
+            ]
+          },
+          {
+            letter: 'E',
+            items: [
+              { en: 'Eczema', foreign: 'Ekzema', roman: '' },
+            ]
+          },
+          {
+            letter: 'G',
+            items: [
+              { en: 'Gastritis', foreign: 'Gastritis', roman: '' },
+              { en: 'Gout', foreign: 'Gout', roman: '' },
+            ]
+          },
+          {
+            letter: 'H',
+            items: [
+              { en: 'Haemorrhoids', foreign: 'Buasir', roman: '' },
+              { en: 'Hand, Foot and Mouth Disease', foreign: 'Penyakit tangan, kaki dan mulut', roman: '' },
+              { en: 'Heart Disease', foreign: 'Penyakit jantung', roman: '' },
+              { en: 'Hypertension / High Blood Pressure', foreign: 'Tekanan darah tinggi', roman: '' },
+            ]
+          },
+          {
+            letter: 'M',
+            items: [
+              { en: 'Menopause', foreign: 'Menopaus', roman: '' },
+              { en: 'Menstrual Disorders', foreign: 'Gangguan haid', roman: '' },
+            ]
+          },
+          {
+            letter: 'O',
+            items: [
+              { en: 'Oral Thrush', foreign: 'Kandidiasis mulut', roman: '' },
+              { en: 'Osteoporosis', foreign: 'Osteoporosis', roman: '' },
+            ]
+          },
+          {
+            letter: 'P',
+            items: [
+              { en: 'Psoriasis', foreign: 'Psoriasis', roman: '' },
+            ]
+          },
+          {
+            letter: 'S',
+            items: [
+              { en: 'Scabies', foreign: 'Kudis', roman: '' },
+              { en: 'Shingles', foreign: 'Kayap', roman: '' },
+              { en: 'Skin Fungal Infection', foreign: 'Jangkitan kulit kulat', roman: '' },
+              { en: 'Stroke', foreign: 'Angin Ahmar', roman: '' },
+            ]
+          },
+          {
+            letter: 'T',
+            items: [
+              { en: 'Tension Headache', foreign: 'Sakit kepala tension', roman: '' },
+              { en: 'Thyroid Disorder', foreign: 'Gangguan tiroid', roman: '' },
+            ]
+          },
+          {
+            letter: 'U',
+            items: [
+              { en: 'Upper Respiratory Tract Infection (URTI)', foreign: 'Jangkitan saluran pernafasan atas', roman: '' },
+              { en: '– Sore Throat', foreign: 'Sakit tekak', roman: '' },
+              { en: '– Cough', foreign: 'Batuk', roman: '' },
+              { en: '– Runny Nose', foreign: 'Selesema', roman: '' },
+              { en: '– Nose Congestion', foreign: 'Hidung tersumbat', roman: '' },
+              { en: 'Urinary Tract Infection', foreign: 'Jangkitan saluran kencing', roman: '' },
+              { en: 'Urticaria / Hives', foreign: 'Ruam / Gegata', roman: '' },
+            ]
+          },
+          {
+            letter: 'V',
+            items: [
+              { en: 'Varicose Veins', foreign: 'Urat varikos', roman: '' },
+              { en: 'Vertigo', foreign: 'Vertigo', roman: '' },
+            ]
+          },
+          {
+            letter: 'W',
+            items: [
+              { en: 'Warts', foreign: 'Ketuat', roman: '' },
+            ]
+          },
+        ]
+      },
+    ]
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let currentLang = null;
+let currentModuleIdx = null;
+let quizQuestions = [];
+let quizIdx = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+function getProgress() {
+  try { return JSON.parse(localStorage.getItem('pharma-progress') || '{}'); } catch(e) { return {}; }
+}
+function saveProgress(data) {
+  try { localStorage.setItem('pharma-progress', JSON.stringify(data)); } catch(e) {}
+}
+function getModuleKey(lang, modId) { return lang + '_' + modId; }
+function getModuleProgress(lang, modId) {
+  const p = getProgress();
+  return p[getModuleKey(lang, modId)] || { status: 'not-started', score: null, pct: 0, heard: [] };
+}
+function setModuleProgress(lang, modId, status, score, pct) {
+  const p = getProgress();
+  const existing = p[getModuleKey(lang, modId)] || {};
+  p[getModuleKey(lang, modId)] = { status, score, pct, heard: existing.heard || [] };
+  saveProgress(p);
+}
+
+// Called each time a phrase audio button is pressed
+function markItemHeard(lang, modId, itemKey, totalItems) {
+  const p = getProgress();
+  const key = getModuleKey(lang, modId);
+  const entry = p[key] || { status: 'not-started', score: null, pct: 0, heard: [] };
+  if (!entry.heard) entry.heard = [];
+  if (!entry.heard.includes(itemKey)) entry.heard.push(itemKey);
+  const heardCount = entry.heard.length;
+  // Learn phase: 0–70% of bar; quiz pushes it to 100%
+  const learnPct = Math.round((heardCount / totalItems) * 70);
+  entry.pct = Math.max(learnPct, entry.pct);
+  if (entry.status === 'not-started') entry.status = 'in-progress';
+  p[key] = entry;
+  saveProgress(p);
+  // Live-update the module card bar if visible
+  refreshModuleCardBar(lang, modId, entry.pct, entry.status);
+  return entry.pct;
+}
+
+function getTotalItems(mod) {
+  if (mod.subsections) return mod.subsections.reduce((a, s) => a + s.items.length, 0);
+  return mod.items.length;
+}
+
+// Refresh a module card's progress bar & status badge without full re-render
+function refreshModuleCardBar(lang, modId, pct, status) {
+  const grid = document.getElementById('modules-grid');
+  if (!grid) return;
+  const cards = grid.querySelectorAll('.module-card');
+  const modules = CONTENT[lang] ? CONTENT[lang].modules : [];
+  modules.forEach((mod, i) => {
+    if (mod.id === modId && cards[i]) {
+      const bar = cards[i].querySelector('.progress-bar-fill');
+      if (bar) bar.style.width = pct + '%';
+      const badge = cards[i].querySelector('.module-status');
+      if (badge && status === 'in-progress') {
+        badge.className = 'module-status status-in-progress';
+        badge.textContent = 'In progress';
+      }
+    }
+  });
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  updateHeader(id);
+}
+
+function updateHeader(pageId) {
+  const nav = document.getElementById('header-nav');
+  nav.innerHTML = '';
+  if (pageId === 'page-modules') {
+    const btn = document.createElement('button');
+    btn.className = 'btn-back';
+    btn.textContent = '← Languages';
+    btn.onclick = () => showPage('page-landing');
+    const badge = document.createElement('span');
+    badge.className = 'lang-badge';
+    badge.textContent = currentLang ? CONTENT[currentLang].label : '';
+    nav.appendChild(badge);
+    nav.appendChild(btn);
+  } else if (pageId === 'page-learn' || pageId === 'page-quiz') {
+    const btn = document.createElement('button');
+    btn.className = 'btn-back';
+    btn.textContent = '← Modules';
+    btn.onclick = () => showPage('page-modules');
+    const badge = document.createElement('span');
+    badge.className = 'lang-badge';
+    badge.textContent = currentLang ? CONTENT[currentLang].label : '';
+    nav.appendChild(badge);
+    nav.appendChild(btn);
+  } else if (pageId === 'page-results') {
+    const btn = document.createElement('button');
+    btn.className = 'btn-back';
+    btn.textContent = '← Modules';
+    btn.onclick = () => showPage('page-modules');
+    nav.appendChild(btn);
+  }
+}
+
+// ============================================================
+// LANGUAGE SELECTION
+// ============================================================
+function selectLanguage(lang) {
+  currentLang = lang;
+  renderModules();
+  showPage('page-modules');
+}
+
+// ============================================================
+// MODULES PAGE
+// ============================================================
+function renderModules() {
+  const lang = CONTENT[currentLang];
+  document.getElementById('modules-title').textContent = lang.label + ' – Learning Modules';
+  document.getElementById('modules-sub').textContent = 'Choose a module to start learning';
+  const grid = document.getElementById('modules-grid');
+  grid.innerHTML = '';
+  lang.modules.forEach((mod, i) => {
+    const prog = getModuleProgress(currentLang, mod.id);
+    const card = document.createElement('div');
+    card.className = 'module-card';
+    card.onclick = () => openModule(i);
+
+    let statusClass = 'status-not-started';
+    let statusLabel = 'Not started';
+    if (prog.status === 'in-progress') { statusClass = 'status-in-progress'; statusLabel = 'In progress'; }
+    if (prog.status === 'completed') { statusClass = 'status-completed'; statusLabel = '✓ Completed'; }
+
+    const itemCount = mod.subsections
+      ? mod.subsections.reduce((a, s) => a + s.items.length, 0)
+      : mod.items.length;
+
+    card.innerHTML = `
+      <div class="module-card-header">
+        <div class="module-num">${i + 1}</div>
+        <div class="module-info">
+          <h3>${mod.title}</h3>
+          <p>${mod.titleForeign} &nbsp;·&nbsp; ${itemCount} items</p>
+        </div>
+      </div>
+      <div>
+        <span class="module-status ${statusClass}">${statusLabel}</span>
+        ${prog.score !== null ? `<span style="float:right;font-size:0.78rem;color:var(--text-muted);">Last score: ${prog.score}/10</span>` : ''}
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" style="width:${prog.pct || 0}%"></div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ============================================================
+// MODULE LEARN PAGE
+// ============================================================
+function openModule(idx) {
+  currentModuleIdx = idx;
+  const lang = CONTENT[currentLang];
+  const mod = lang.modules[idx];
+  const totalItems = getTotalItems(mod);
+
+  // Only flip to in-progress if truly not started (don't reset existing progress)
+  const prog = getModuleProgress(currentLang, mod.id);
+  if (prog.status === 'not-started') {
+    setModuleProgress(currentLang, mod.id, 'in-progress', null, 0);
+  }
+
+  document.getElementById('learn-title').textContent = `Module ${idx + 1}: ${mod.title}`;
+  document.getElementById('learn-desc').textContent = `${mod.titleForeign} — ${totalItems} items · Press 🔊 on each phrase, then take the quiz`;
+
+  const list = document.getElementById('phrase-list');
+  list.innerHTML = '';
+
+  if (mod.subsections) {
+    mod.subsections.forEach(sub => {
+      const heading = document.createElement('div');
+      heading.className = 'subsection-title';
+      heading.textContent = sub.letter;
+      list.appendChild(heading);
+      sub.items.forEach((item, j) => {
+        list.appendChild(makePhraseCard(item, j, idx, currentLang, sub.letter, mod.id, totalItems));
+      });
+    });
+  } else {
+    mod.items.forEach((item, j) => {
+      list.appendChild(makePhraseCard(item, j, idx, currentLang, null, mod.id, totalItems));
+    });
+  }
+
+  showPage('page-learn');
+}
+
+function makePhraseCard(item, j, modIdx, lang, subLetter, modId, totalItems) {
+  const card = document.createElement('div');
+  card.className = 'phrase-card';
+
+  // Restore heard state visually
+  const itemKey = (subLetter ? subLetter + '_' : '') + j;
+  const prog = getModuleProgress(lang, modId);
+  if (prog.heard && prog.heard.includes(itemKey)) {
+    card.style.borderLeft = '3px solid var(--teal)';
+  }
+
+  const indexDiv = document.createElement('div');
+  indexDiv.className = 'phrase-index';
+  indexDiv.textContent = j + 1;
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'phrase-content';
+  const enDiv = document.createElement('div');
+  enDiv.className = 'phrase-english';
+  enDiv.textContent = item.en;
+  const foreignDiv = document.createElement('div');
+  foreignDiv.className = 'phrase-foreign';
+  foreignDiv.textContent = item.foreign;
+  contentDiv.appendChild(enDiv);
+  contentDiv.appendChild(foreignDiv);
+  if (item.roman) {
+    const romanDiv = document.createElement('div');
+    romanDiv.className = 'phrase-romanized';
+    romanDiv.textContent = item.roman;
+    contentDiv.appendChild(romanDiv);
+  }
+
+  const audioBtn = document.createElement('button');
+  audioBtn.className = 'btn-audio';
+  audioBtn.title = 'Play pronunciation';
+  audioBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+  audioBtn.addEventListener('click', function() {
+    speakPhrase(item.foreign, item.en, lang, this);
+    // Mark this item as heard and update progress
+    markItemHeard(lang, modId, itemKey, totalItems);
+    card.style.borderLeft = '3px solid var(--teal)';
+  });
+
+  card.appendChild(indexDiv);
+  card.appendChild(contentDiv);
+  card.appendChild(audioBtn);
+  return card;
+}
+
+// ============================================================
+// AUDIO – Cross-browser Web Speech API
+// Chrome ✓ | Edge ✓ | Firefox ✓ | Safari ✓ | Android Chrome ✓
+// ============================================================
+let activeSpeechBtn = null;
+let _voicesReady = false;
+let _voicesList = [];
+let _voicesCallbacks = [];
+
+function _onVoicesReady(cb) {
+  if (_voicesReady) { cb(_voicesList); return; }
+  _voicesCallbacks.push(cb);
+}
+
+function _resolveVoices(list) {
+  if (_voicesReady) return;
+  _voicesReady = true;
+  _voicesList = list;
+  _voicesCallbacks.forEach(fn => fn(list));
+  _voicesCallbacks = [];
+}
+
+function _initVoices() {
+  if (!('speechSynthesis' in window)) return;
+  // Chrome desktop: voices available synchronously
+  const immediate = window.speechSynthesis.getVoices();
+  if (immediate.length > 0) { _resolveVoices(immediate); return; }
+  // Event-based loading (Chrome, Edge, Firefox)
+  const onChanged = () => {
+    const v = window.speechSynthesis.getVoices();
+    if (v.length > 0) { _resolveVoices(v); }
+  };
+  window.speechSynthesis.addEventListener('voiceschanged', onChanged);
+  // Poll fallback: Edge/Safari sometimes never fire voiceschanged
+  let tries = 0;
+  const poll = setInterval(() => {
+    const v = window.speechSynthesis.getVoices();
+    if (v.length > 0) { clearInterval(poll); _resolveVoices(v); return; }
+    if (++tries >= 50) { clearInterval(poll); _resolveVoices([]); } // give up at 5s
+  }, 100);
+}
+
+function _getBestVoice(voices, langCode) {
+  const prefix = langCode.split('-')[0].toLowerCase();
+  return voices.find(v => v.lang === langCode)
+      || voices.find(v => v.lang.toLowerCase().startsWith(prefix))
+      // Malay fallback: use Indonesian (id) if ms not available (common on Android)
+      || (prefix === 'ms' ? voices.find(v => v.lang.toLowerCase().startsWith('id')) : null)
+      || null;
+}
+
+function _clearActive() {
+  if (activeSpeechBtn) { activeSpeechBtn.classList.remove('playing'); activeSpeechBtn = null; }
+}
+
+function doSpeak(text, langCode, btn) {
+  if (!('speechSynthesis' in window)) return;
+  _clearActive();
+  try { window.speechSynthesis.cancel(); } catch(e) {}
+  if (btn) { btn.classList.add('playing'); activeSpeechBtn = btn; }
+  _onVoicesReady((voices) => {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang    = langCode;
+    utter.rate    = 0.82;
+    utter.pitch   = 1;
+    utter.volume  = 1;
+    const voice = _getBestVoice(voices, langCode);
+    if (voice) utter.voice = voice;
+    if (btn) {
+      utter.onend   = () => { if (activeSpeechBtn === btn) { btn.classList.remove('playing'); activeSpeechBtn = null; } };
+      utter.onerror = (e) => {
+        if (activeSpeechBtn === btn) { btn.classList.remove('playing'); activeSpeechBtn = null; }
+        if (e.error && e.error !== 'interrupted' && e.error !== 'canceled') console.warn('TTS error:', e.error);
+      };
+    }
+    // 80ms delay: fixes Edge cancel-then-speak silent failure + Safari pause issue
+    setTimeout(() => {
+      try {
+        if (window.speechSynthesis.paused) { try { window.speechSynthesis.resume(); } catch(e){} }
+        window.speechSynthesis.speak(utter);
+      } catch(err) {
+        console.warn('speak() failed:', err);
+        if (btn) { btn.classList.remove('playing'); activeSpeechBtn = null; }
+      }
+    }, 80);
+  });
+}
+
+// Safari keep-alive: Safari pauses speechSynthesis after ~15s idle
+// A periodic resume() call prevents the queue from stalling
+(function safariKeepAlive() {
+  if (!('speechSynthesis' in window)) return;
+  setInterval(() => {
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }
+  }, 10000);
+})();
+
+function getLangCode(lang) {
+  return lang === 'mandarin' ? 'zh-CN' : 'ms-MY';
+}
+
+function speakPhrase(foreignText, englishText, lang, btn) {
+  if (!('speechSynthesis' in window)) {
+    alert('Text-to-speech is not supported in this browser.');
+    return;
+  }
+  doSpeak(foreignText, getLangCode(lang), btn);
+}
+
+function playQuizPhrase(foreignText, lang) {
+  if (!('speechSynthesis' in window)) return;
+  doSpeak(foreignText, getLangCode(lang), null);
+}
+
+// Initialise on page load
+_initVoices();
+
+// ============================================================
+// QUIZ GENERATION
+// ============================================================
+function getAllItems(mod) {
+  if (mod.subsections) {
+    return mod.subsections.flatMap(s => s.items);
+  }
+  return mod.items;
+}
+
+// Strip leading "– " or "- " from display labels
+function cleanLabel(text) {
+  return text.replace(/^[-–]\s*/, '');
+}
+
+function goToQuiz() {
+  const mod = CONTENT[currentLang].modules[currentModuleIdx];
+  const allItems = getAllItems(mod);
+  quizQuestions = generateQuiz(allItems, mod, 10);
+  quizIdx = 0;
+  quizScore = 0;
+  renderQuizQuestion();
+  showPage('page-quiz');
+  document.getElementById('quiz-title').textContent = `Quiz – Module ${currentModuleIdx + 1}: ${mod.title}`;
+}
+
+function generateQuiz(items, mod, count) {
+  // Filter out sub-items (those with leading hyphen) for wrong-answer pool to keep options clean
+  const mainItems = items.filter(x => !x.en.startsWith('–') && !x.en.startsWith('-'));
+  const pool = mainItems.length >= 4 ? mainItems : items;
+
+  const shuffled = [...items].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, Math.min(count, items.length));
+
+  // Question types: 0=text (show foreign→pick English), 1=audio-to-text (hear foreign→pick English), 2=text-to-audio (show English→hear options→pick foreign)
+  const types = [0, 1, 2];
+
+  return selected.map((item, i) => {
+    const qType = types[i % 3]; // cycle through all 3 types
+
+    // Wrong answers always drawn from pool, never the correct item
+    const wrongPool = pool.filter(x => x.en !== item.en);
+    const wrong = wrongPool.sort(() => Math.random() - 0.5).slice(0, 3);
+
+    if (qType === 2) {
+      // text-to-audio: show English, options are foreign-language words, user picks correct foreign
+      const options = [item.foreign, ...wrong.map(w => w.foreign)].sort(() => Math.random() - 0.5);
+      return { item, qType, options, correctIdx: options.indexOf(item.foreign), optionLang: 'foreign' };
+    } else {
+      // text or audio-to-text: options are English meanings
+      const options = [item.en, ...wrong.map(w => w.en)].sort(() => Math.random() - 0.5);
+      return { item, qType, options, correctIdx: options.indexOf(item.en), optionLang: 'english' };
+    }
+  });
+}
+
+function renderQuizQuestion() {
+  if (quizIdx >= quizQuestions.length) { showResults(); return; }
+
+  const q = quizQuestions[quizIdx];
+  const total = quizQuestions.length;
+  const fill = Math.round((quizIdx / total) * 100);
+
+  document.getElementById('quiz-prog-fill').style.width = fill + '%';
+  document.getElementById('quiz-count-lbl').textContent = `${quizIdx + 1} / ${total}`;
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('q-feedback').textContent = '';
+  document.getElementById('btn-next-q').style.display = 'none';
+  quizAnswered = false;
+
+  const typeLabel = document.getElementById('q-type-label');
+  const qQuestion = document.getElementById('q-question');
+  const qForeign = document.getElementById('q-foreign');
+  const qAudioBtn = document.getElementById('q-audio-btn');
+
+  if (q.qType === 0) {
+    // Show foreign text → pick English meaning
+    typeLabel.textContent = 'Text Question – Translate to English';
+    qQuestion.textContent = 'What does this mean in English?';
+    qForeign.textContent = q.item.foreign + (q.item.roman ? `  (${q.item.roman})` : '');
+    // Show audio button so user can hear the foreign word
+    qAudioBtn.style.display = 'inline-flex';
+    qAudioBtn.setAttribute('data-text', q.item.foreign);
+    qAudioBtn.setAttribute('data-speak-lang', currentLang);
+
+  } else if (q.qType === 1) {
+    // Hear foreign audio → pick English meaning
+    typeLabel.textContent = 'Audio Question – Listen & Choose';
+    qQuestion.textContent = 'Listen to the audio. What does it mean in English?';
+    qForeign.textContent = '';
+    qAudioBtn.style.display = 'inline-flex';
+    qAudioBtn.setAttribute('data-text', q.item.foreign);
+    qAudioBtn.setAttribute('data-speak-lang', currentLang);
+    // No auto-play – user presses the button
+
+  } else {
+    // Show English → pick correct foreign translation (options are foreign words + audio button per option)
+    typeLabel.textContent = 'Audio Question – Find the Translation';
+    qQuestion.textContent = 'Which audio matches the English phrase below?';
+    qForeign.textContent = `"${cleanLabel(q.item.en)}"`;
+    qAudioBtn.style.display = 'none';
+  }
+
+  const optionsDiv = document.getElementById('q-options');
+  optionsDiv.innerHTML = '';
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+
+    if (q.qType === 2) {
+      // Foreign language options: show text + a mini play button
+      btn.style.display = 'flex';
+      btn.style.alignItems = 'center';
+      btn.style.gap = '10px';
+
+      const playIcon = document.createElement('span');
+      playIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" style="flex-shrink:0;fill:var(--dark-blue)"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>';
+      playIcon.style.cursor = 'pointer';
+      playIcon.title = 'Play this option';
+      playIcon.addEventListener('click', function(e) {
+        e.stopPropagation();
+        playQuizPhrase(opt, currentLang);
+      });
+
+      const optText = document.createElement('span');
+      // For foreign options show foreign + roman if available
+      const matchItem = getAllItems(CONTENT[currentLang].modules[currentModuleIdx]).find(x => x.foreign === opt);
+      optText.textContent = opt + (matchItem && matchItem.roman ? `  (${matchItem.roman})` : '');
+
+      btn.appendChild(playIcon);
+      btn.appendChild(optText);
+    } else {
+      btn.textContent = cleanLabel(opt);
+    }
+
+    btn.onclick = () => selectAnswer(i);
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function playQuizAudio() {
+  const btn = document.getElementById('q-audio-btn');
+  const text = btn.getAttribute('data-text');
+  playQuizPhrase(text, currentLang);
+}
+
+function selectAnswer(chosenIdx) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const q = quizQuestions[quizIdx];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(b => b.disabled = true);
+
+  const feedback = document.getElementById('q-feedback');
+  const isCorrect = chosenIdx === q.correctIdx;
+
+  if (isCorrect) {
+    quizScore++;
+    opts[chosenIdx].classList.add('correct');
+    feedback.className = 'quiz-feedback correct';
+  } else {
+    opts[chosenIdx].classList.add('incorrect');
+    opts[q.correctIdx].classList.add('reveal');
+    feedback.className = 'quiz-feedback incorrect';
+  }
+
+  // Build feedback message depending on question type
+  const en = cleanLabel(q.item.en);
+  const foreign = q.item.foreign;
+  const roman = q.item.roman ? ` (${q.item.roman})` : '';
+
+  if (isCorrect) {
+    feedback.textContent = `✓ Correct!  "${en}" = ${foreign}${roman}`;
+  } else {
+    if (q.qType === 2) {
+      feedback.textContent = `✗ Incorrect. "${en}" translates to: ${foreign}${roman}`;
+    } else {
+      feedback.textContent = `✗ Incorrect. ${foreign}${roman} means: "${en}"`;
+    }
+  }
+
+  document.getElementById('btn-next-q').style.display = 'block';
+  document.getElementById('btn-next-q').textContent = quizIdx < quizQuestions.length - 1 ? 'Next Question →' : 'See Results →';
+}
+
+function nextQuestion() {
+  quizIdx++;
+  renderQuizQuestion();
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  const total = quizQuestions.length;
+  const pct = Math.round((quizScore / total) * 100);
+  const passed = quizScore >= 6;
+  const mod = CONTENT[currentLang].modules[currentModuleIdx];
+
+  // Progress bar: learn phase = up to 70%, quiz phase = 70–100%
+  const quizContrib = Math.round((quizScore / total) * 30);
+  const existing = getModuleProgress(currentLang, mod.id);
+  const learnBase = Math.min(existing.pct, 70);
+  const finalPct = passed ? 100 : learnBase + quizContrib;
+
+  setModuleProgress(currentLang, mod.id, passed ? 'completed' : 'in-progress', quizScore, finalPct);
+  renderModules(); // refresh module cards
+
+  document.getElementById('results-icon').textContent = passed ? '🎉' : '📖';
+  document.getElementById('results-icon').className = 'results-icon ' + (passed ? 'pass' : 'fail');
+  document.getElementById('results-title').textContent = passed ? 'Module Completed!' : 'Keep Practising!';
+  document.getElementById('results-score').innerHTML = `${quizScore}<span> / ${total}</span>`;
+  document.getElementById('results-message').textContent = passed
+    ? `Well done! You scored ${pct}%. This module has been marked as completed.`
+    : `You scored ${pct}%. You need 6/10 to complete the module. Review the phrases and try again!`;
+
+  showPage('page-results');
+}
+
+function retryQuiz() {
+  goToQuiz();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+showPage('page-landing');
+</script>
+</body>
+</html>
