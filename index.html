@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharmacy – Language Aid (Part 1)</title>
+<style>
+:root {
+  --db: #19478C; --lb: #3EB3E1; --teal: #009CA2;
+  --bl: #e8f4fd; --g50: #f8fafc; --g100: #f1f5f9;
+  --g200: #e2e8f0; --g400: #94a3b8; --g600: #475569; --g800: #1e293b;
+  --ok: #22c55e; --err: #ef4444; --gold: #f59e0b;
+  --sh: 0 4px 16px rgba(25,71,140,.12); --r: 14px; --rl: 20px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Tahoma, sans-serif; background: var(--g50); color: var(--g800); min-height: 100vh; }
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+/* LANDING */
+#sl { background: linear-gradient(135deg,var(--db),#1a5fa8 55%,var(--teal)); justify-content: center; align-items: center; padding: 2rem; }
+.lcard { background: rgba(255,255,255,.97); border-radius: var(--rl); padding: 2.5rem 2rem; max-width: 460px; width: 100%; text-align: center; box-shadow: var(--sh); }
+.lcard h1 { font-size: 1.6rem; font-weight: 900; color: var(--db); margin: .5rem 0 .25rem; }
+.lcard .sub { font-size: .85rem; color: var(--g600); margin-bottom: .5rem; }
+.lbadge { display: inline-block; background: linear-gradient(135deg,var(--teal),var(--lb)); color: #fff; font-size: .72rem; font-weight: 700; padding: .2rem .75rem; border-radius: 999px; margin-bottom: 1.25rem; }
+.lgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+.lbtn { border: none; border-radius: var(--r); padding: 1.1rem 1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: .35rem; transition: transform .15s; }
+.lbtn:hover { transform: translateY(-2px); }
+.lbtn.zh { background: linear-gradient(135deg,var(--db),#2563eb); color: #fff; }
+.lbtn.ms { background: linear-gradient(135deg,var(--teal),#0891b2); color: #fff; }
+.lbtn .ln { font-size: 1rem; font-weight: 700; }
+.lbtn .ls { font-size: .7rem; opacity: .85; }
+/* NAVBAR */
+.nav { background: var(--db); color: #fff; padding: .8rem 1.1rem; display: flex; align-items: center; gap: .6rem; position: sticky; top: 0; z-index: 100; }
+.nbk { background: rgba(255,255,255,.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ntitle { font-weight: 700; font-size: .9rem; flex: 1; }
+.nbadge { background: rgba(255,255,255,.18); padding: .15rem .55rem; border-radius: 999px; font-size: .7rem; font-weight: 600; }
+/* DASHBOARD */
+.dhero { background: linear-gradient(135deg,var(--db),#1e6ec7); color: #fff; padding: 1.25rem 1rem 1.5rem; }
+.dhero h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: .2rem; }
+.dhero p { font-size: .82rem; opacity: .85; margin-bottom: .75rem; }
+.oprog { background: rgba(255,255,255,.15); border-radius: 10px; padding: .6rem .85rem; }
+.oprog-lbl { font-size: .75rem; opacity: .9; display: flex; justify-content: space-between; margin-bottom: .3rem; }
+.pbar { height: 7px; background: rgba(255,255,255,.25); border-radius: 4px; overflow: hidden; }
+.pfill { height: 100%; background: linear-gradient(90deg,#7dd3fc,var(--lb)); border-radius: 4px; transition: width .5s; }
+.mlist { padding: 1.1rem; display: flex; flex-direction: column; gap: .75rem; }
+.mcard { background: #fff; border-radius: var(--r); padding: 1rem; border: 2px solid transparent; display: flex; align-items: center; gap: .85rem; cursor: pointer; transition: all .15s; }
+.mcard:hover { border-color: var(--lb); box-shadow: var(--sh); }
+.mcard.completed { border-color: var(--ok); }
+.mcard.in-progress { border-color: var(--lb); }
+.micon { font-size: 1.7rem; width: 40px; text-align: center; flex-shrink: 0; }
+.minfo { flex: 1; min-width: 0; }
+.mname { font-weight: 700; font-size: .9rem; color: var(--db); }
+.mpb { height: 4px; background: var(--g100); border-radius: 2px; overflow: hidden; margin-top: .4rem; }
+.mpf { height: 100%; background: linear-gradient(90deg,var(--lb),var(--teal)); border-radius: 2px; transition: width .4s; }
+.mtask { font-size: .68rem; color: var(--g400); margin-top: .2rem; }
+.mst { font-size: .68rem; font-weight: 700; padding: .18rem .5rem; border-radius: 999px; flex-shrink: 0; }
+.mst.not-started { background: var(--g100); color: var(--g400); }
+.mst.completed { background: #dcfce7; color: #16a34a; }
+.mst.in-progress { background: var(--bl); color: var(--db); }
+/* MODULE */
+.mhdr { background: linear-gradient(135deg,var(--teal),var(--db)); color: #fff; padding: 1rem; }
+.mhdr h2 { font-size: 1.05rem; font-weight: 800; }
+.tabs { display: flex; overflow-x: auto; background: #fff; border-bottom: 2px solid var(--g100); -webkit-overflow-scrolling: touch; }
+.tab { flex-shrink: 0; padding: .65rem .9rem; background: none; border: none; font-family: Tahoma,sans-serif; font-size: .78rem; font-weight: 600; color: var(--g400); cursor: pointer; border-bottom: 2.5px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+.tab.active { color: var(--db); border-bottom-color: var(--db); }
+.tp { display: none; padding: 1rem; }
+.tp.active { display: block; }
+/* FLASHCARD */
+.fc { background: #fff; border-radius: var(--r); border: .5px solid var(--g200); padding: .85rem 1rem; display: flex; align-items: center; gap: .75rem; margin-bottom: .6rem; }
+.fcm { flex: 1; }
+.fct { font-size: 1.1rem; font-weight: 700; color: var(--db); }
+.fcp { font-size: .75rem; color: var(--teal); font-style: italic; margin-top: .1rem; }
+.fce { font-size: .8rem; color: var(--g600); }
+.ptrow { display: flex; align-items: center; gap: .5rem; background: var(--bl); border-radius: 10px; padding: .6rem .85rem; margin-bottom: .85rem; font-size: .78rem; }
+.tgsw { position: relative; width: 36px; height: 20px; display: inline-block; flex-shrink: 0; }
+.tgsw input { opacity: 0; width: 0; height: 0; }
+.tgsl { position: absolute; inset: 0; background: var(--teal); border-radius: 20px; cursor: pointer; }
+.tgsl::before { content: ''; position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; top: 3px; left: 19px; transition: .3s; }
+input:not(:checked) + .tgsl { background: var(--g200); }
+input:not(:checked) + .tgsl::before { left: 3px; }
+/* AUDIO */
+.abtn { background: linear-gradient(135deg,var(--lb),var(--teal)); border: none; color: #fff; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .15s; }
+.abtn:active { transform: scale(.9); }
+.abtn.playing { background: linear-gradient(135deg,var(--teal),var(--db)); }
+/* MATCH */
+.mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.mi { border-radius: 9px; padding: .55rem .6rem; font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s; border: 1.5px solid var(--g200); background: #fff; }
+.mi:hover { border-color: var(--lb); background: var(--bl); }
+.mi.sel { border-color: var(--db); background: var(--bl); }
+.mi.ok { border-color: var(--ok); background: #dcfce7; color: #16a34a; }
+.mi.bad { border-color: var(--err); background: #fee2e2; color: #dc2626; animation: shk .4s; }
+.miL { display: flex; align-items: center; gap: .3rem; }
+/* SCENARIO */
+.scbox { background: linear-gradient(135deg,#eff6ff,#f0fdf4); border: 1.5px solid var(--lb); border-radius: var(--r); padding: .85rem; margin-bottom: .85rem; }
+.sclbl { font-size: .68rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .5px; margin-bottom: .3rem; }
+.sctext { font-size: .85rem; font-weight: 600; color: var(--db); }
+/* QUIZ */
+.qrow { display: flex; align-items: flex-start; gap: .6rem; margin-bottom: .75rem; }
+.qtext { font-weight: 700; font-size: .9rem; color: var(--db); flex: 1; line-height: 1.4; }
+.qopt-wrap { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+.qopt { background: #fff; border: 1.5px solid var(--g200); border-radius: 9px; padding: .65rem .9rem; font-size: .85rem; cursor: pointer; flex: 1; text-align: left; font-family: Tahoma,sans-serif; transition: all .15s; }
+.qopt:hover:not(:disabled) { border-color: var(--lb); background: var(--bl); }
+.qopt.ok { border-color: var(--ok); background: #dcfce7; color: #15803d; font-weight: 700; }
+.qopt.bad { border-color: var(--err); background: #fee2e2; color: #dc2626; }
+.qfb { padding: .5rem .7rem; border-radius: 8px; font-size: .8rem; font-weight: 600; margin-top: .5rem; }
+.qfb.ok { background: #dcfce7; color: #15803d; }
+.qfb.bad { background: #fee2e2; color: #dc2626; }
+.qdots { display: flex; gap: 3px; flex-wrap: wrap; }
+.qd { width: 7px; height: 7px; border-radius: 50%; background: var(--g200); }
+.qd.done { background: var(--teal); }
+.qd.ok { background: var(--ok); }
+.qd.bad { background: var(--err); }
+/* SCORE */
+.scard { background: #fff; border-radius: var(--rl); padding: 1.75rem; text-align: center; margin: .5rem; border: .5px solid var(--g200); }
+.snum { font-size: 2.5rem; font-weight: 900; color: var(--db); }
+.smsg { font-size: .95rem; font-weight: 700; color: var(--teal); margin: .6rem 0; }
+.badge { display: inline-flex; align-items: center; gap: .4rem; background: linear-gradient(135deg,var(--gold),#fbbf24); color: #fff; padding: .4rem .85rem; border-radius: 999px; font-weight: 700; font-size: .8rem; margin: .5rem 0; }
+/* BTN */
+.btn { background: linear-gradient(135deg,var(--db),#2563eb); color: #fff; border: none; border-radius: 9px; padding: .65rem 1.25rem; font-family: Tahoma,sans-serif; font-size: .85rem; font-weight: 700; cursor: pointer; transition: all .15s; box-shadow: 0 2px 8px rgba(25,71,140,.22); }
+.btn:hover { transform: translateY(-1px); }
+.btn.teal { background: linear-gradient(135deg,var(--teal),#0891b2); }
+.btn.out { background: none; border: 1.5px solid var(--db); color: var(--db); box-shadow: none; }
+.btn.out:hover { background: var(--bl); }
+.btn.blk { width: 100%; margin-top: .5rem; }
+.btn.sm { padding: .45rem .9rem; font-size: .78rem; }
+/* STITLE */
+.stitle { font-size: .72rem; font-weight: 700; color: var(--g400); text-transform: uppercase; letter-spacing: .5px; margin-bottom: .6rem; }
+/* CONFETTI */
+.cconf { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
+.cp { position: absolute; border-radius: 2px; animation: cfall 2.5s ease-in forwards; }
+/* ANIMATIONS */
+@keyframes shk { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+@keyframes cfall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+@keyframes pop { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
+.pop { animation: pop .3s ease; }
+@media(min-width:600px){ .mlist,.tp { max-width: 600px; margin-left: auto; margin-right: auto; } }
+</style>
+</head>
+<body>
+<div class="cconf" id="cc"></div>
+
+<!-- LANDING -->
+<div id="sl" class="screen active">
+  <div class="lcard">
+    <div style="font-size:2.2rem">💊</div>
+    <h1>Pharmacy<br>Language Aid</h1>
+    <p class="sub">Part 1</p>
+    <div class="lbadge">✨ For Pharmacy Staff</div>
+    <p style="font-size:.8rem;color:var(--g600);margin-bottom:1rem">Choose a language to begin your micro-learning journey.</p>
+    <div class="lgrid">
+      <button class="lbtn zh" onclick="selectLang('mandarin')">
+        <span class="ln">Mandarin</span><span class="ls">普通话</span>
+      </button>
+      <button class="lbtn ms" onclick="selectLang('malay')">
+        <span class="ln">Malay</span><span class="ls">Bahasa Melayu</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="sd" class="screen">
+  <div class="nav">
+    <button class="nbk" onclick="goTo('sl')">←</button>
+    <div class="ntitle">Module Dashboard</div>
+    <div class="nbadge" id="dlbadge"></div>
+  </div>
+  <div class="dhero">
+    <h2 id="dtitle">Modules</h2>
+    <p>Tap a module to start. Progress is saved automatically.</p>
+    <div class="oprog">
+      <div class="oprog-lbl"><span>Overall Progress</span><span id="opct">0%</span></div>
+      <div class="pbar"><div class="pfill" id="opbar" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="mlist" id="mlist"></div>
+</div>
+
+<!-- MODULE -->
+<div id="sm" class="screen">
+  <div class="nav">
+    <button class="nbk" id="mbk">←</button>
+    <div class="ntitle" id="mntitle">Module</div>
+    <div class="nbadge" id="mlbadge"></div>
+  </div>
+  <div class="mhdr"><h2 id="mhtitle"></h2></div>
+  <div class="tabs" id="tabbar"></div>
+  <div id="tabpanels"></div>
+</div>
+
+<script>
+// ── VOCAB ──────────────────────────────
+const V = {
+  greetings: [
+    {en:"Good morning",zh:"早上好",py:"Zǎo shang hǎo",ms:"Selamat pagi"},
+    {en:"Good afternoon",zh:"下午好",py:"Xià wǔ hǎo",ms:"Selamat tengah hari"},
+    {en:"Hi, how can I help you?",zh:"您好，有什么可以帮您？",py:"Nín hǎo, yǒu shénme kěyǐ bāng nín?",ms:"Hi, boleh saya bantu?"},
+    {en:"Here to collect medicine?",zh:"是来拿药的吗？",py:"Shì lái ná yào de ma?",ms:"Datang ambil ubat?"},
+    {en:"May I have your name?",zh:"可以告诉我您的名字吗？",py:"Kěyǐ gào sù wǒ nín de míng zì ma?",ms:"Boleh saya dapatkan nama anda?"},
+    {en:"May I have your NRIC / IC?",zh:"可以给我您的身份证吗？",py:"Kěyǐ gěi wǒ nín de shēn fèn zhèng ma?",ms:"Boleh tunjukkan IC anda?"},
+    {en:"Date of birth",zh:"出生日期",py:"Chū shēng rì qī",ms:"Tarikh lahir"},
+    {en:"Thank you",zh:"谢谢",py:"Xiè xie",ms:"Terima kasih"},
+    {en:"Any questions?",zh:"有问题吗？",py:"Yǒu wèn tí ma?",ms:"Ada soalan?"},
+    {en:"Please wait for your number",zh:"请等您的号码",py:"Qǐng děng nín de hào mǎ",ms:"Sila tunggu nombor anda"},
+    {en:"Take a seat first",zh:"请先坐下",py:"Qǐng xiān zuò xià",ms:"Sila duduk dahulu"}
+  ],
+  numbers: [
+    {en:"One (1)",zh:"一",py:"Yī",ms:"Satu"},
+    {en:"Two (2)",zh:"二",py:"Èr",ms:"Dua"},
+    {en:"Three (3)",zh:"三",py:"Sān",ms:"Tiga"},
+    {en:"Four (4)",zh:"四",py:"Sì",ms:"Empat"},
+    {en:"Five (5)",zh:"五",py:"Wǔ",ms:"Lima"},
+    {en:"Six (6)",zh:"六",py:"Liù",ms:"Enam"},
+    {en:"Seven (7)",zh:"七",py:"Qī",ms:"Tujuh"},
+    {en:"Eight (8)",zh:"八",py:"Bā",ms:"Lapan"},
+    {en:"Nine (9)",zh:"九",py:"Jiǔ",ms:"Sembilan"},
+    {en:"Ten (10)",zh:"十",py:"Shí",ms:"Sepuluh"},
+    {en:"Eleven (11)",zh:"十一",py:"Shí yī",ms:"Sebelas"},
+    {en:"Twelve (12)",zh:"十二",py:"Shí èr",ms:"Dua belas"},
+    {en:"Fourteen (14)",zh:"十四",py:"Shí sì",ms:"Empat belas"},
+    {en:"Twenty (20)",zh:"二十",py:"Èr shí",ms:"Dua puluh"},
+    {en:"Quantity",zh:"数量",py:"Shù liàng",ms:"Kuantiti"}
+  ],
+  dispensing: [
+    {en:"Once a day",zh:"一天一次",py:"Yì tiān yí cì",ms:"Sekali sehari"},
+    {en:"Twice a day",zh:"一天两次",py:"Yì tiān liǎng cì",ms:"Dua kali sehari"},
+    {en:"Three times a day",zh:"一天三次",py:"Yì tiān sān cì",ms:"Tiga kali sehari"},
+    {en:"Morning",zh:"早上",py:"Zǎo shang",ms:"Pagi"},
+    {en:"Afternoon",zh:"下午",py:"Xià wǔ",ms:"Tengah hari"},
+    {en:"Evening",zh:"傍晚",py:"Bàng wǎn",ms:"Petang"},
+    {en:"Night",zh:"晚上",py:"Wǎn shàng",ms:"Malam"},
+    {en:"Before food",zh:"饭前",py:"Fàn qián",ms:"Sebelum makan"},
+    {en:"After food",zh:"饭后",py:"Fàn hòu",ms:"Selepas makan"},
+    {en:"With food",zh:"随餐服用",py:"Suí cān fú yòng",ms:"Ambil bersama makanan"},
+    {en:"Finish all medicine",zh:"把药吃完",py:"Bǎ yào chī wán",ms:"Habiskan ubat"},
+    {en:"Do not stop early",zh:"不要提早停药",py:"Bú yào tí zǎo tíng yào",ms:"Jangan berhenti awal"},
+    {en:"Medicine",zh:"药",py:"Yào",ms:"Ubat"},
+    {en:"Tablet",zh:"药片",py:"Yào piàn",ms:"Tablet"},
+    {en:"Capsule",zh:"胶囊",py:"Jiāo náng",ms:"Kapsul"},
+    {en:"Syrup / liquid",zh:"药水",py:"Yào shuǐ",ms:"Sirap"},
+    {en:"Cream / ointment",zh:"药膏",py:"Yào gāo",ms:"Krim"},
+    {en:"Inhaler",zh:"吸入器",py:"Xī rù qì",ms:"Penyedut"},
+    {en:"This is your medicine",zh:"这是您的药",py:"Zhè shì nín de yào",ms:"Ini ubat anda"},
+    {en:"Do you have any drug allergy?",zh:"您有药物敏感吗？",py:"Nín yǒu yào wù mǐn gǎn ma?",ms:"Ada alahan ubat?"},
+    {en:"Avoid alcohol",zh:"避免喝酒",py:"Bì miǎn hē jiǔ",ms:"Elakkan alkohol"},
+    {en:"May cause drowsiness",zh:"可能会嗜睡",py:"Kě néng huì shì shuì",ms:"Boleh menyebabkan mengantuk"},
+    {en:"Do not drive",zh:"不要开车",py:"Bú yào kāi chē",ms:"Jangan memandu"},
+    {en:"Shake well before use",zh:"使用前摇匀",py:"Shǐ yòng qián yáo yún",ms:"Goncang sebelum guna"},
+    {en:"Store in cool, dry place",zh:"存放在阴凉干燥处",py:"Cún fàng zài yīn liáng gān zào chù",ms:"Simpan di tempat sejuk dan kering"},
+    {en:"Keep away from children",zh:"远离儿童",py:"Yuǎn lí ér tóng",ms:"Jauhkan daripada kanak-kanak"},
+    {en:"For external use only",zh:"只限外用",py:"Zhǐ xiàn wài yòng",ms:"Untuk kegunaan luar sahaja"},
+    {en:"Keep in fridge",zh:"放在冰箱",py:"Fàng zài bīng xiāng",ms:"Simpan dalam peti sejuk"},
+    {en:"This is normal",zh:"这是正常的",py:"Zhè shì zhèng cháng de",ms:"Ini adalah biasa"},
+    {en:"See doctor if worsens",zh:"如果更严重请看医生",py:"Rú guǒ gèng yán zhòng qǐng kàn yī shēng",ms:"Jumpa doktor jika bertambah teruk"},
+    {en:"Side effects",zh:"副作用",py:"Fù zuò yòng",ms:"Kesan sampingan"},
+    {en:"Do not take on empty stomach",zh:"不要空腹服用",py:"Bú yào kōng fù fú yòng",ms:"Jangan ambil semasa perut kosong"}
+  ]
+};
+
+const MODS = [
+  {id:'greetings', icon:'👋', name:'Greetings'},
+  {id:'numbers',   icon:'🔢', name:'Numbers (1–20)'},
+  {id:'dispensing',icon:'💊', name:'Dispensing Phrases'}
+];
+const TASKS = ['learn','match','scenario','quiz'];
+
+// ── STATE ──────────────────────────────
+let lang = 'mandarin', curMod = null;
+const isMandarin = () => lang === 'mandarin';
+const tgt = item => isMandarin() ? item.zh : item.ms;
+
+// ── PROGRESS ──────────────────────────
+function getProg() { try { return JSON.parse(localStorage.getItem('pp') || '{}'); } catch(e) { return {}; } }
+function saveProg(p) { localStorage.setItem('pp', JSON.stringify(p)); }
+function getMod(mod) { return getProg()[lang]?.[mod] || {status:'not-started', tasks:{}}; }
+function setMod(mod, data) {
+  const p = getProg();
+  if (!p[lang]) p[lang] = {};
+  p[lang][mod] = { ...getMod(mod), ...data };
+  saveProg(p);
+}
+function completeTask(mod, task) {
+  const mp = getMod(mod);
+  const tasks = { ...(mp.tasks||{}), [task]: true };
+  const done = TASKS.filter(t => tasks[t]).length;
+  setMod(mod, { tasks, status: done === TASKS.length ? 'completed' : 'in-progress' });
+  refreshCard(mod);
+}
+function taskPct(mod) {
+  const mp = getMod(mod);
+  return Math.round(TASKS.filter(t => mp.tasks?.[t]).length / TASKS.length * 100);
+}
+function refreshCard(mod) {
+  const pct = taskPct(mod);
+  const mp = getMod(mod);
+  const fill = document.querySelector(`[data-fill="${mod}"]`);
+  const st = document.querySelector(`[data-st="${mod}"]`);
+  const card = document.querySelector(`[data-card="${mod}"]`);
+  if (fill) fill.style.width = pct + '%';
+  if (st) { st.textContent = mp.status==='completed' ? 'Completed ✓' : 'In Progress'; st.className = 'mst ' + mp.status; }
+  if (card) card.className = 'mcard ' + mp.status;
+  updateOverall();
+}
+function updateOverall() {
+  const total = MODS.reduce((s, m) => s + taskPct(m.id), 0);
+  const pct = Math.round(total / MODS.length);
+  const bar = document.getElementById('opbar');
+  const lbl = document.getElementById('opct');
+  if (bar) bar.style.width = pct + '%';
+  if (lbl) lbl.textContent = pct + '%';
+}
+
+// ── NAVIGATION ────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function selectLang(l) {
+  lang = l;
+  document.getElementById('dlbadge').textContent = l === 'mandarin' ? '普通话' : 'Bahasa Melayu';
+  document.getElementById('dtitle').textContent = l === 'mandarin' ? 'Mandarin Modules' : 'Malay Modules';
+  renderDash();
+  goTo('sd');
+}
+
+// ── DASHBOARD ─────────────────────────
+function renderDash() {
+  const list = document.getElementById('mlist');
+  list.innerHTML = '';
+  MODS.forEach(mod => {
+    const mp = getMod(mod.id);
+    const pct = taskPct(mod.id);
+    const stText = mp.status === 'completed' ? 'Completed ✓' : mp.status === 'in-progress' ? 'In Progress' : 'Not Started';
+    const card = document.createElement('div');
+    card.className = 'mcard ' + mp.status;
+    card.dataset.card = mod.id;
+    card.innerHTML = `
+      <div class="micon">${mod.icon}</div>
+      <div class="minfo">
+        <div class="mname">${mod.name}</div>
+        <div class="mpb"><div class="mpf" data-fill="${mod.id}" style="width:${pct}%"></div></div>
+        <div class="mtask">${TASKS.filter(t => mp.tasks?.[t]).length}/${TASKS.length} tasks done</div>
+      </div>
+      <div class="mst ${mp.status}" data-st="${mod.id}">${stText}</div>`;
+    card.onclick = () => openMod(mod.id);
+    list.appendChild(card);
+  });
+  updateOverall();
+}
+
+// ── MODULE ────────────────────────────
+function openMod(id) {
+  curMod = id;
+  const mod = MODS.find(m => m.id === id);
+  const vocab = V[id];
+  document.getElementById('mntitle').textContent = mod.name;
+  document.getElementById('mlbadge').textContent = isMandarin() ? '普通话' : 'BM';
+  document.getElementById('mhtitle').textContent = mod.icon + ' ' + mod.name;
+  document.getElementById('mbk').onclick = () => { renderDash(); goTo('sd'); };
+  const mp = getMod(id);
+  if (mp.status === 'not-started') setMod(id, {status:'in-progress'});
+
+  const tabs = [
+    {label:'📖 Learn',    key:'learn',    fn: p => renderLearn(p, vocab, id)},
+    {label:'🔀 Match',    key:'match',    fn: p => renderMatch(p, vocab, id)},
+    {label:'🎭 Scenario', key:'scenario', fn: p => renderScenario(p, id)},
+    {label:'📝 Quiz',     key:'quiz',     fn: p => renderQuiz(p, vocab, id)}
+  ];
+
+  const bar = document.getElementById('tabbar');
+  const panels = document.getElementById('tabpanels');
+  bar.innerHTML = ''; panels.innerHTML = '';
+
+  tabs.forEach((tab, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (i === 0 ? ' active' : '');
+    btn.textContent = tab.label;
+    const panel = document.createElement('div');
+    panel.className = 'tp' + (i === 0 ? ' active' : '');
+    panel.id = 'tp' + i;
+    btn.onclick = () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tp').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      panel.classList.add('active');
+      if (!panel.dataset.rendered) {
+        tab.fn(panel);
+        panel.dataset.rendered = '1';
+        if (tab.key === 'learn' || tab.key === 'match') completeTask(id, tab.key);
+      }
+    };
+    bar.appendChild(btn);
+    panels.appendChild(panel);
+  });
+
+  // render first tab immediately
+  const p0 = document.getElementById('tp0');
+  tabs[0].fn(p0);
+  p0.dataset.rendered = '1';
+  completeTask(id, 'learn');
+  goTo('sm');
+}
+
+// ── LEARN ─────────────────────────────
+function renderLearn(panel, vocab, modId) {
+  const py = isMandarin();
+  let showPy = true;
+  const ptHtml = py ? `<div class="ptrow">
+    <label class="tgsw"><input type="checkbox" id="pytog" checked onchange="togglePy(this.checked)"><span class="tgsl"></span></label>
+    <span style="font-weight:600;color:var(--db);font-size:.78rem">Show Pinyin (汉语拼音)</span></div>` : '';
+  const cards = vocab.map((item, i) => `
+    <div class="fc">
+      <div class="fcm">
+        <div class="fct">${tgt(item)}</div>
+        ${py ? `<div class="fcp pyt">${item.py}</div>` : ''}
+        <div class="fce">${item.en}</div>
+      </div>
+      <button class="abtn" style="width:34px;height:34px;font-size:.75rem" onclick="speak('${modId}',${i},this)">▶</button>
+    </div>`).join('');
+  panel.innerHTML = `<div class="stitle">🃏 Flashcards</div>${ptHtml}<div>${cards}</div>`;
+}
+window.togglePy = show => document.querySelectorAll('.pyt').forEach(el => el.style.display = show ? '' : 'none');
+
+// ── MATCH ─────────────────────────────
+// Learner plays 5 rounds. Each round uses a fresh ordering of 6 items
+// (words may repeat across rounds, but the left+right sequence signature
+// is guaranteed to differ from every previous round). Learners can use
+// Previous/Next to revise earlier rounds — previously completed rounds
+// appear as read-only revision views with all pairs already matched.
+const MATCH_ROUNDS = 5;
+
+function renderMatch(panel, vocab, modId) {
+  // Per-round state: { leftItems, rightItems, matched (Set), complete }
+  const rounds = [];
+  let cur = 0;
+
+  // Build one round of items + orderings whose signature hasn't been used.
+  function buildRound() {
+    const usedSigs = new Set(rounds.map(r => r.sig));
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const pick = shuffle([...vocab]).slice(0, Math.min(6, vocab.length));
+      const leftOrder = shuffle([...pick]);
+      const rightOrder = shuffle([...pick]);
+      const sig = leftOrder.map(x => x.en).join('|') + '#' + rightOrder.map(x => x.en).join('|');
+      if (!usedSigs.has(sig)) {
+        return { leftOrder, rightOrder, sig };
+      }
+    }
+    // Extremely unlikely fallback
+    const pick = shuffle([...vocab]).slice(0, Math.min(6, vocab.length));
+    return { leftOrder: shuffle([...pick]), rightOrder: shuffle([...pick]), sig: '_' + Math.random() };
+  }
+
+  // Ensure we have state for the current round (generate lazily)
+  function ensureRound(idx) {
+    while (rounds.length <= idx) {
+      const built = buildRound();
+      rounds.push({
+        leftItems: built.leftOrder.map(x => ({id: x.en, label: tgt(x), item: x})),
+        rightItems: built.rightOrder.map(x => ({id: x.en, label: x.en})),
+        sig: built.sig,
+        matched: new Set(),
+        complete: false
+      });
+    }
+    return rounds[idx];
+  }
+
+  function drawRound() {
+    const st = ensureRound(cur);
+    const itemCount = st.leftItems.length;
+    let selL = null;
+
+    panel.innerHTML = `<div class="stitle">🔀 Match the Phrases · Round ${cur+1} of ${MATCH_ROUNDS}</div>
+      <p style="font-size:.8rem;color:var(--g600);margin-bottom:.85rem">Tap ▶ to hear, then tap its English meaning.</p>
+      <div class="mgrid" id="mgrid"></div>
+      <div id="mscore" style="margin-top:.85rem;text-align:center;font-size:.82rem;color:var(--g600)"></div>
+      <div id="mnext" style="margin-top:.75rem"></div>
+      <div class="navrow" style="display:flex;gap:.5rem;margin-top:.75rem">
+        <button class="btn out" id="mPrev" style="flex:1" ${cur===0?'disabled':''}>← Previous Round</button>
+        <button class="btn" id="mNext" style="flex:1" ${!st.complete || cur===MATCH_ROUNDS-1?'disabled':''}>Next Round →</button>
+      </div>`;
+
+    function render() {
+      const g = panel.querySelector('#mgrid');
+      g.innerHTML = '';
+      st.leftItems.forEach((li, i) => {
+        const el = document.createElement('div');
+        el.className = 'mi miL' + (st.matched.has(li.id) ? ' ok' : '');
+        el.dataset.id = li.id;
+        if (!st.matched.has(li.id) && !st.complete) el.onclick = () => handleL(el, li.id, li.item);
+        const ab = document.createElement('button');
+        ab.className = 'abtn'; ab.style.cssText = 'width:24px;height:24px;font-size:.6rem;flex-shrink:0';
+        ab.textContent = '▶';
+        ab.onclick = e => { e.stopPropagation(); speakText(tgt(li.item), ab); };
+        const sp = document.createElement('span'); sp.style.cssText = 'font-size:.82rem;flex:1';
+        sp.textContent = li.label;
+        el.appendChild(ab); el.appendChild(sp);
+        g.appendChild(el);
+
+        const ri = st.rightItems[i];
+        const rel = document.createElement('div');
+        rel.className = 'mi' + (st.matched.has(ri.id) ? ' ok' : '');
+        rel.dataset.id = ri.id;
+        rel.textContent = ri.label;
+        if (!st.matched.has(ri.id) && !st.complete) rel.onclick = () => handleR(rel, ri.id);
+        g.appendChild(rel);
+      });
+    }
+
+    function handleL(el, id, item) {
+      if (selL === id) { selL = null; document.querySelectorAll('#mgrid .mi.sel').forEach(e => e.classList.remove('sel')); return; }
+      document.querySelectorAll('#mgrid .miL.sel').forEach(e => e.classList.remove('sel'));
+      el.classList.add('sel'); selL = id;
+    }
+    function handleR(el, id) {
+      if (!selL) return;
+      if (selL === id) {
+        st.matched.add(id); selL = null; render();
+        const sc = panel.querySelector('#mscore');
+        const nx = panel.querySelector('#mnext');
+        if (st.matched.size === itemCount) {
+          st.complete = true;
+          sc.innerHTML = `<span style="color:var(--ok);font-weight:700">🎉 Round ${cur+1} complete!</span>`;
+          celebrate();
+          // Mark match task done after the first round so progress updates early.
+          if (cur === 0) completeTask(modId, 'match');
+          // Enable the Next Round button in the nav bar (except on last round)
+          const nextBtn = panel.querySelector('#mNext');
+          if (cur < MATCH_ROUNDS - 1 && nextBtn) nextBtn.disabled = false;
+          if (cur === MATCH_ROUNDS - 1) {
+            nx.innerHTML = `<div class="scard pop">
+              <div style="font-size:2.5rem">🏆</div>
+              <p class="smsg">All ${MATCH_ROUNDS} rounds complete!</p>
+              <p style="font-size:.82rem;color:var(--g400)">Great practice — you've matched ${MATCH_ROUNDS * itemCount} pairs.</p>
+              <button class="btn out blk" onclick="restartMatch('${modId}')">🔁 Play Again</button>
+            </div>`;
+          }
+        } else {
+          sc.textContent = `✅ ${st.matched.size}/${itemCount} matched`;
+        }
+      } else {
+        el.classList.add('bad');
+        document.querySelectorAll('#mgrid .miL.sel').forEach(e => { e.classList.remove('sel'); e.classList.add('bad'); });
+        setTimeout(() => { el.classList.remove('bad'); document.querySelectorAll('#mgrid .mi.bad').forEach(e => e.classList.remove('bad')); selL = null; }, 500);
+      }
+    }
+
+    render();
+
+    // If revisiting a completed round, show the completion message as revision
+    if (st.complete) {
+      panel.querySelector('#mscore').innerHTML = `<span style="color:var(--ok);font-weight:700">✓ Round ${cur+1} complete — reviewing</span>`;
+      if (cur === MATCH_ROUNDS - 1) {
+        panel.querySelector('#mnext').innerHTML = `<div class="scard pop">
+          <div style="font-size:2.5rem">🏆</div>
+          <p class="smsg">All ${MATCH_ROUNDS} rounds complete!</p>
+          <p style="font-size:.82rem;color:var(--g400)">Great practice — you've matched ${MATCH_ROUNDS * itemCount} pairs.</p>
+          <button class="btn out blk" onclick="restartMatch('${modId}')">🔁 Play Again</button>
+        </div>`;
+      }
+    }
+
+    panel.querySelector('#mPrev').onclick = () => { if (cur > 0) { cur--; drawRound(); } };
+    panel.querySelector('#mNext').onclick = () => {
+      if (cur < MATCH_ROUNDS - 1 && rounds[cur] && rounds[cur].complete) {
+        cur++; drawRound();
+      }
+    };
+  }
+
+  drawRound();
+}
+
+// Restart match from round 1 (called from "Play Again" button)
+window.restartMatch = id => {
+  const panels = document.querySelectorAll('.tp');
+  // Match is the 2nd tab (index 1)
+  const matchPanel = panels[1];
+  if (matchPanel) { matchPanel.dataset.rendered = ''; renderMatch(matchPanel, V[id], id); matchPanel.dataset.rendered = '1'; }
+};
+
+// ── SCENARIOS ─────────────────────────
+const SCENARIOS = {
+  greetings: [
+    {sit:"An elderly patient arrives at your counter in the morning.", q:"Which greeting do you use?", opts:[
+      {zh:"早上好",ms:"Selamat pagi",ok:true,why:"Correct — morning greeting."},
+      {zh:"下午好",ms:"Selamat tengah hari",ok:false,why:"This is an afternoon greeting."},
+      {zh:"谢谢",ms:"Terima kasih",ok:false,why:"This means 'Thank you'."}]},
+    {sit:"A patient approaches and you need to confirm they are here to collect medicine.", q:"What do you say?", opts:[
+      {zh:"是来拿药的吗？",ms:"Datang ambil ubat?",ok:true,why:"Yes — this asks if they are collecting medicine."},
+      {zh:"出生日期",ms:"Tarikh lahir",ok:false,why:"This means 'Date of birth' — not appropriate here."},
+      {zh:"有问题吗？",ms:"Ada soalan?",ok:false,why:"This means 'Any questions?' — not the best opening."}]},
+    {sit:"You need to verify the patient's identity before dispensing.", q:"Which phrase asks for their NRIC?", opts:[
+      {zh:"可以给我您的身份证吗？",ms:"Boleh tunjukkan IC anda?",ok:true,why:"Correct — this politely requests the NRIC."},
+      {zh:"可以告诉我您的名字吗？",ms:"Boleh saya dapatkan nama anda?",ok:false,why:"This asks for their name, not NRIC."},
+      {zh:"谢谢",ms:"Terima kasih",ok:false,why:"This means 'Thank you' — not relevant here."}]},
+    {sit:"After dispensing, you want to invite the patient to ask questions.", q:"What do you say?", opts:[
+      {zh:"有问题吗？",ms:"Ada soalan?",ok:true,why:"Correct — this invites questions."},
+      {zh:"出生日期",ms:"Tarikh lahir",ok:false,why:"'Date of birth' is not a closing phrase."},
+      {zh:"早上好",ms:"Selamat pagi",ok:false,why:"A greeting is not appropriate as a closing."}]},
+    {sit:"A patient arrives in the afternoon.", q:"Which greeting is appropriate?", opts:[
+      {zh:"下午好",ms:"Selamat tengah hari",ok:true,why:"Correct — afternoon greeting."},
+      {zh:"早上好",ms:"Selamat pagi",ok:false,why:"This is a morning greeting."},
+      {zh:"请等您的号码",ms:"Sila tunggu nombor anda",ok:false,why:"This asks them to wait — not a greeting."}]},
+    {sit:"The queue is busy and a patient needs to wait for their number.", q:"What do you tell them?", opts:[
+      {zh:"请等您的号码",ms:"Sila tunggu nombor anda",ok:true,why:"Correct — wait for your number."},
+      {zh:"谢谢",ms:"Terima kasih",ok:false,why:"Thanking them doesn't give the instruction to wait."},
+      {zh:"可以告诉我您的名字吗？",ms:"Boleh saya dapatkan nama anda?",ok:false,why:"You need to ask them to wait, not ask their name again."}]},
+    {sit:"The patient is done and leaving. You want to thank them politely.", q:"Which phrase do you use?", opts:[
+      {zh:"谢谢",ms:"Terima kasih",ok:true,why:"Correct — 'Thank you' is the polite closing."},
+      {zh:"是来拿药的吗？",ms:"Datang ambil ubat?",ok:false,why:"This is an opening phrase, not a closing."},
+      {zh:"出生日期",ms:"Tarikh lahir",ok:false,why:"Date of birth is not relevant here."}]},
+    {sit:"A patient is at the counter but you need them to sit and wait first.", q:"Which phrase do you use?", opts:[
+      {zh:"请先坐下",ms:"Sila duduk dahulu",ok:true,why:"Correct — 'Please take a seat first'."},
+      {zh:"请等您的号码",ms:"Sila tunggu nombor anda",ok:false,why:"This asks them to wait for a number, not to sit."},
+      {zh:"早上好",ms:"Selamat pagi",ok:false,why:"A greeting is not the instruction needed here."}]},
+    {sit:"You need a new patient's name before looking up their prescription.", q:"Which phrase do you use?", opts:[
+      {zh:"可以告诉我您的名字吗？",ms:"Boleh saya dapatkan nama anda?",ok:true,why:"Correct — politely asks for the patient's name."},
+      {zh:"可以给我您的身份证吗？",ms:"Boleh tunjukkan IC anda?",ok:false,why:"This asks for the NRIC — you need the name first."},
+      {zh:"出生日期",ms:"Tarikh lahir",ok:false,why:"Date of birth comes later — you need the name first."}]},
+    {sit:"You need to confirm a patient's date of birth against the prescription record.", q:"Which phrase do you say?", opts:[
+      {zh:"出生日期",ms:"Tarikh lahir",ok:true,why:"Correct — cues the patient to provide their date of birth."},
+      {zh:"有问题吗？",ms:"Ada soalan?",ok:false,why:"This asks for questions — not for date of birth."},
+      {zh:"谢谢",ms:"Terima kasih",ok:false,why:"'Thank you' is not the right phrase for verification."}]}
+  ],
+  numbers: [
+    {sit:"A patient needs to take 2 tablets at a time.", q:"What number do you show?", opts:[
+      {zh:"二",ms:"Dua",ok:true,why:"Correct — 2."},
+      {zh:"三",ms:"Tiga",ok:false,why:"This is 3."},
+      {zh:"一",ms:"Satu",ok:false,why:"This is 1."}]},
+    {sit:"A prescription says to take 1 tablet every night.", q:"Which number do you use?", opts:[
+      {zh:"一",ms:"Satu",ok:true,why:"Correct — 1 tablet."},
+      {zh:"二",ms:"Dua",ok:false,why:"This is 2."},
+      {zh:"十",ms:"Sepuluh",ok:false,why:"This is 10 — too many!"}]},
+    {sit:"A patient is on a 14-day course of antibiotics.", q:"Which number means 14?", opts:[
+      {zh:"十四",ms:"Empat belas",ok:true,why:"Correct — 14."},
+      {zh:"十二",ms:"Dua belas",ok:false,why:"This is 12."},
+      {zh:"二十",ms:"Dua puluh",ok:false,why:"This is 20."}]},
+    {sit:"There are 10 tablets in the patient's pack.", q:"Which number do you say?", opts:[
+      {zh:"十",ms:"Sepuluh",ok:true,why:"Correct — 10."},
+      {zh:"九",ms:"Sembilan",ok:false,why:"This is 9."},
+      {zh:"十一",ms:"Sebelas",ok:false,why:"This is 11."}]},
+    {sit:"The prescription is for a 7-day course.", q:"Which number means 7?", opts:[
+      {zh:"七",ms:"Tujuh",ok:true,why:"Correct — 7."},
+      {zh:"六",ms:"Enam",ok:false,why:"This is 6."},
+      {zh:"八",ms:"Lapan",ok:false,why:"This is 8."}]},
+    {sit:"A patient needs to collect 20 tablets.", q:"Which number means 20?", opts:[
+      {zh:"二十",ms:"Dua puluh",ok:true,why:"Correct — 20."},
+      {zh:"十二",ms:"Dua belas",ok:false,why:"This is 12."},
+      {zh:"十",ms:"Sepuluh",ok:false,why:"This is 10."}]},
+    {sit:"A loading dose requires 5 tablets at once.", q:"Which number means 5?", opts:[
+      {zh:"五",ms:"Lima",ok:true,why:"Correct — 5."},
+      {zh:"四",ms:"Empat",ok:false,why:"This is 4."},
+      {zh:"六",ms:"Enam",ok:false,why:"This is 6."}]},
+    {sit:"A pack contains 12 capsules for a twice-daily course.", q:"Which number means 12?", opts:[
+      {zh:"十二",ms:"Dua belas",ok:true,why:"Correct — 12."},
+      {zh:"十一",ms:"Sebelas",ok:false,why:"This is 11."},
+      {zh:"十四",ms:"Empat belas",ok:false,why:"This is 14."}]},
+    {sit:"A patient takes 3 tablets at a time.", q:"Which number means 3?", opts:[
+      {zh:"三",ms:"Tiga",ok:true,why:"Correct — 3."},
+      {zh:"二",ms:"Dua",ok:false,why:"This is 2."},
+      {zh:"四",ms:"Empat",ok:false,why:"This is 4."}]},
+    {sit:"A patient has an 11-day course of antibiotics.", q:"Which number means 11?", opts:[
+      {zh:"十一",ms:"Sebelas",ok:true,why:"Correct — 11."},
+      {zh:"十",ms:"Sepuluh",ok:false,why:"This is 10."},
+      {zh:"十二",ms:"Dua belas",ok:false,why:"This is 12."}]}
+  ],
+  dispensing: [
+    {sit:"A patient is prescribed antibiotics 3 times a day, after food, for 5 days.", q:"Which phrase describes the frequency?", opts:[
+      {zh:"一天三次",ms:"Tiga kali sehari",ok:true,why:"✅ Correct — 3 times a day."},
+      {zh:"一天一次",ms:"Sekali sehari",ok:false,why:"This means once a day."},
+      {zh:"一天两次",ms:"Dua kali sehari",ok:false,why:"This means twice a day."}]},
+    {sit:"A patient asks when to take metronidazole. It must be taken AFTER food to avoid nausea.", q:"Which food instruction do you give?", opts:[
+      {zh:"饭后",ms:"Selepas makan",ok:true,why:"✅ Correct — after food."},
+      {zh:"饭前",ms:"Sebelum makan",ok:false,why:"⚠️ Before food could worsen nausea."},
+      {zh:"随餐服用",ms:"Ambil bersama makanan",ok:false,why:"With food is close, but after food is the standard instruction."}]},
+    {sit:"A patient wants to stop antibiotics after 3 days because they feel better.", q:"What is the most important safety message?", opts:[
+      {zh:"不要提早停药",ms:"Jangan berhenti awal",ok:true,why:"✅ Critical — do not stop early."},
+      {zh:"谢谢",ms:"Terima kasih",ok:false,why:"Thanking them is not the priority."},
+      {zh:"把药吃完",ms:"Habiskan ubat",ok:false,why:"Also correct but do not stop early is more direct."}]},
+    {sit:"A patient is prescribed an antacid to be taken BEFORE food.", q:"Which food instruction is correct?", opts:[
+      {zh:"饭前",ms:"Sebelum makan",ok:true,why:"✅ Correct — before food."},
+      {zh:"饭后",ms:"Selepas makan",ok:false,why:"After food is too late for an antacid."},
+      {zh:"随餐服用",ms:"Ambil bersama makanan",ok:false,why:"With food is not the same as before food here."}]},
+    {sit:"A patient's medication should be taken twice a day with food.", q:"Which combination is correct?", opts:[
+      {zh:"一天两次 / 随餐服用",ms:"Dua kali sehari / Ambil bersama makanan",ok:true,why:"✅ Correct — twice a day with food."},
+      {zh:"一天一次 / 饭前",ms:"Sekali sehari / Sebelum makan",ok:false,why:"Both frequency and food are wrong."},
+      {zh:"一天三次 / 饭后",ms:"Tiga kali sehari / Selepas makan",ok:false,why:"Frequency doesn't match."}]},
+    {sit:"A patient asks if they should finish the last 2 tablets of their antibiotic even though they feel well.", q:"What do you tell them?", opts:[
+      {zh:"把药吃完",ms:"Habiskan ubat",ok:true,why:"✅ Yes — always finish the full course."},
+      {zh:"谢谢",ms:"Terima kasih",ok:false,why:"'Thank you' is not the instruction needed."},
+      {zh:"随餐服用",ms:"Ambil bersama makanan",ok:false,why:"'With food' doesn't address whether to finish the course."}]},
+    {sit:"A patient's prescription is for morning and night dosing — twice a day.", q:"Which time pair is correct?", opts:[
+      {zh:"早上 / 晚上",ms:"Pagi / Malam",ok:true,why:"✅ Correct — morning and night."},
+      {zh:"下午 / 傍晚",ms:"Tengah hari / Petang",ok:false,why:"Afternoon and evening — not the right pair."},
+      {zh:"早上 / 下午",ms:"Pagi / Tengah hari",ok:false,why:"Morning and afternoon doesn't cover night dosing."}]},
+    {sit:"You are dispensing a liquid antibiotic. The patient must shake it before use.", q:"Which instruction do you give?", opts:[
+      {zh:"使用前摇匀",ms:"Goncang sebelum guna",ok:true,why:"✅ Correct — shake before use."},
+      {zh:"存放在阴凉干燥处",ms:"Simpan di tempat sejuk dan kering",ok:false,why:"This is a storage instruction."},
+      {zh:"避免喝酒",ms:"Elakkan alkohol",ok:false,why:"Alcohol avoidance is not the instruction needed here."}]},
+    {sit:"A patient taking a sedating antihistamine wants to drive home.", q:"Which warning is most critical?", opts:[
+      {zh:"不要开车",ms:"Jangan memandu",ok:true,why:"⚠️ Critical — do not drive when drowsy!"},
+      {zh:"可能会嗜睡",ms:"Boleh menyebabkan mengantuk",ok:false,why:"Noting drowsiness is good but do not drive is more actionable."},
+      {zh:"避免喝酒",ms:"Elakkan alkohol",ok:false,why:"Important, but driving safety is the immediate concern."}]},
+    {sit:"You are handing over a cream and need to confirm it is for external use only.", q:"Which phrase do you use?", opts:[
+      {zh:"只限外用",ms:"Untuk kegunaan luar sahaja",ok:true,why:"✅ Correct — for external use only."},
+      {zh:"使用前摇匀",ms:"Goncang sebelum guna",ok:false,why:"Shake before use is for liquids, not creams."},
+      {zh:"放在冰箱",ms:"Simpan dalam peti sejuk",ok:false,why:"Storage in fridge is not the instruction needed."}]},
+    {sit:"A patient asks where to store their insulin. It must be refrigerated.", q:"Which storage instruction do you give?", opts:[
+      {zh:"放在冰箱",ms:"Simpan dalam peti sejuk",ok:true,why:"✅ Correct — insulin must be kept in the fridge."},
+      {zh:"存放在阴凉干燥处",ms:"Simpan di tempat sejuk dan kering",ok:false,why:"Cool and dry is not the same as refrigerated."},
+      {zh:"远离儿童",ms:"Jauhkan daripada kanak-kanak",ok:false,why:"Keep away from children is important but not the storage instruction asked."}]},
+    {sit:"A patient reports mild dizziness after starting a new antibiotic and is worried.", q:"Which phrase reassures them?", opts:[
+      {zh:"这是正常的",ms:"Ini adalah biasa",ok:true,why:"✅ Correct — this is normal."},
+      {zh:"如果更严重请看医生",ms:"Jumpa doktor jika bertambah teruk",ok:false,why:"See doctor if worsens is for worsening symptoms, not mild ones."},
+      {zh:"避免喝酒",ms:"Elakkan alkohol",ok:false,why:"Alcohol avoidance is unrelated to reassurance."}]},
+    {sit:"A patient's side effects are getting much worse after starting new medication.", q:"What is the safest advice?", opts:[
+      {zh:"如果更严重请看医生",ms:"Jumpa doktor jika bertambah teruk",ok:true,why:"✅ Correct — always refer to the doctor when symptoms worsen."},
+      {zh:"这是正常的",ms:"Ini adalah biasa",ok:false,why:"Do not tell a patient worsening symptoms are normal."},
+      {zh:"谢谢",ms:"Terima kasih",ok:false,why:"Thanking the patient is not appropriate here."}]},
+    {sit:"You are dispensing a medicine with a known drug interaction with alcohol.", q:"Which warning must you give?", opts:[
+      {zh:"避免喝酒",ms:"Elakkan alkohol",ok:true,why:"✅ Correct — always warn about alcohol interactions."},
+      {zh:"使用前摇匀",ms:"Goncang sebelum guna",ok:false,why:"Shake before use is not relevant to alcohol interaction."},
+      {zh:"放在冰箱",ms:"Simpan dalam peti sejuk",ok:false,why:"Storage instruction is unrelated to the alcohol warning."}]},
+    {sit:"You have dispensed tablets and want to confirm what they are to the patient.", q:"Which phrase do you use?", opts:[
+      {zh:"这是您的药",ms:"Ini ubat anda",ok:true,why:"✅ Correct — this is your medicine."},
+      {zh:"有问题吗？",ms:"Ada soalan?",ok:false,why:"Asking for questions doesn't confirm what the medicine is."},
+      {zh:"只限外用",ms:"Untuk kegunaan luar sahaja",ok:false,why:"External use instruction is not for identifying tablets."}]}
+  ]
+};
+
+function renderScenario(panel, modId) {
+  const list = SCENARIOS[modId] || [];
+  let cur = 0;
+  // Stable shuffled option order per scenario (first time we show it)
+  const optOrders = new Array(list.length).fill(null);
+  // Record of learner's answer per scenario: {pickedIdx, ok} or null
+  const ans = new Array(list.length).fill(null);
+
+  function draw() {
+    if (cur >= list.length) {
+      const correct = ans.filter(a => a && a.ok).length;
+      panel.innerHTML = `<div class="scard"><div style="font-size:2.5rem">🌟</div>
+        <p class="smsg">All scenarios completed!</p>
+        <div style="font-size:.85rem;color:var(--g600);margin:.4rem 0">You got ${correct}/${list.length} correct.</div>
+        <p style="font-size:.82rem;color:var(--g400)">You're ready for real pharmacy situations.</p>
+        <button class="btn out blk" onclick="goScenario('${modId}',0)">← Review Scenarios</button>
+      </div>`;
+      completeTask(modId, 'scenario');
+      return;
+    }
+    const s = list[cur];
+    // Establish option order once per scenario so Previous/Next shows the same layout
+    if (!optOrders[cur]) optOrders[cur] = shuffle([...s.opts]);
+    const opts = optOrders[cur];
+    const already = ans[cur]; // null or {pickedIdx, ok}
+
+    panel.innerHTML = `
+      <div class="stitle">🎭 Scenario ${cur+1} of ${list.length}</div>
+      <div class="scbox"><div class="sclbl">📍 Situation</div><div class="sctext">${s.sit}</div></div>
+      <div style="font-weight:700;font-size:.9rem;color:var(--db);margin-bottom:.75rem">${s.q}</div>
+      <div id="sopts"></div>
+      <div id="sfb" style="margin-top:.75rem"></div>
+      <div class="navrow" style="display:flex;gap:.5rem;margin-top:1rem">
+        <button class="btn out" id="sPrev" style="flex:1" ${cur===0?'disabled':''}>← Previous</button>
+        <button class="btn" id="sNext" style="flex:1" ${!already?'disabled':''}>${cur===list.length-1?'Finish ✓':'Next →'}</button>
+      </div>`;
+
+    const od = panel.querySelector('#sopts');
+    opts.forEach((opt, i) => {
+      const txt = isMandarin() ? opt.zh : opt.ms;
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem';
+      const ab = document.createElement('button');
+      ab.className = 'abtn'; ab.style.cssText = 'width:30px;height:30px;font-size:.75rem;flex-shrink:0';
+      ab.textContent = '▶';
+      ab.onclick = e => { e.stopPropagation(); speakText(txt, ab); };
+      const btn = document.createElement('button');
+      btn.className = 'qopt'; btn.style.flex = '1'; btn.textContent = txt;
+
+      if (already) {
+        // Revision mode — show locked state
+        btn.disabled = true;
+        if (i === already.pickedIdx) btn.classList.add(already.ok ? 'ok' : 'bad');
+        // Also always reveal the correct answer
+        if (opt.ok) btn.classList.add('ok');
+      } else {
+        btn.onclick = () => {
+          od.querySelectorAll('.qopt').forEach(b => b.disabled = true);
+          btn.classList.add(opt.ok ? 'ok' : 'bad');
+          // Reveal correct answer if they picked wrong
+          if (!opt.ok) {
+            opts.forEach((o, j) => { if (o.ok) od.querySelectorAll('.qopt')[j].classList.add('ok'); });
+          }
+          ans[cur] = { pickedIdx: i, ok: opt.ok };
+          panel.querySelector('#sfb').innerHTML = `<div class="qfb ${opt.ok?'ok':'bad'}">${opt.ok?'✅':'❌'} ${opt.why}</div>`;
+          // Enable Next button now that an answer is recorded
+          panel.querySelector('#sNext').disabled = false;
+        };
+      }
+      wrap.appendChild(ab); wrap.appendChild(btn); od.appendChild(wrap);
+    });
+
+    // If already answered, show the feedback again for revision
+    if (already) {
+      const picked = opts[already.pickedIdx];
+      panel.querySelector('#sfb').innerHTML = `<div class="qfb ${already.ok?'ok':'bad'}">${already.ok?'✅':'❌'} ${picked.why}</div>`;
+    }
+
+    panel.querySelector('#sPrev').onclick = () => { if (cur > 0) { cur--; draw(); } };
+    panel.querySelector('#sNext').onclick = () => { cur++; draw(); };
+  }
+  draw();
+}
+// Allow jumping back into scenario review from the completion card
+window.goScenario = (modId, idx) => {
+  const panels = document.querySelectorAll('.tp');
+  // Scenario is the 3rd tab (index 2)
+  const p = panels[2];
+  if (p) { p.dataset.rendered = ''; renderScenario(p, modId); p.dataset.rendered = '1'; }
+};
+
+// ── QUIZ ─────────────────────────────
+function renderQuiz(panel, vocab, modId) {
+  const poolN = modId === 'dispensing' ? 15 : 10;
+  const pool = shuffle([...vocab]).slice(0, Math.min(poolN, vocab.length));
+  const qs = pool.map(item => {
+    const tt = tgt(item);
+    const dis = shuffle(vocab.filter(v => v !== item)).slice(0, 3);
+    if (Math.random() > .5) {
+      // target → English
+      const ci = Math.floor(Math.random() * 4);
+      const opts = dis.map(d => ({label: d.en, spoken: tgt(d)}));
+      opts.splice(ci, 0, {label: item.en, spoken: tt});
+      return {q: `What does <strong>${tt}</strong> mean?`, qAudio: tt, hasQAudio: true, hasOptAudio: false, opts, correct: ci, expl: `It means "${item.en}". (${tt})`};
+    } else {
+      // English → target
+      const ci = Math.floor(Math.random() * 4);
+      const opts = dis.map(d => ({label: tgt(d), spoken: tgt(d)}));
+      opts.splice(ci, 0, {label: tt, spoken: tt});
+      return {q: `How do you say <strong>"${item.en}"</strong> in ${isMandarin() ? 'Mandarin' : 'Malay'}?`, qAudio: tt, hasQAudio: false, hasOptAudio: true, opts, correct: ci, expl: `The correct phrase is: ${tt}`};
+    }
+  });
+  let cur = 0;
+  // Answer record per question: null or {pickedIdx, ok}
+  const ans = new Array(qs.length).fill(null);
+
+  function draw() {
+    // Show summary screen only after all questions have been answered
+    const allAnswered = ans.every(a => a !== null);
+    if (cur >= qs.length && allAnswered) {
+      const sc = ans.filter(a => a && a.ok).length;
+      const pct = Math.round(sc / qs.length * 100);
+      const msg = pct >= 80 ? "🎉 Excellent! You're ready!" : pct >= 60 ? "👍 Good effort! Review and try again." : "📚 Keep practising!";
+      const bdg = pct >= 80 ? '<div class="badge">⭐ Language Pro Badge Earned!</div>' : '';
+      panel.innerHTML = `<div class="scard pop">
+        <div style="font-size:2.5rem">${pct>=80?'🏆':pct>=60?'📈':'💪'}</div>
+        <div class="snum">${sc}/${qs.length}</div>
+        <div style="font-size:.85rem;color:var(--g400)">Questions correct (${pct}%)</div>
+        <div class="smsg">${msg}</div>${bdg}
+        <div class="qdots" style="justify-content:center;margin:.75rem 0">${ans.map(a=>`<div class="qd ${a&&a.ok?'ok':'bad'}"></div>`).join('')}</div>
+        <button class="btn out blk" onclick="reviewQuiz(${qs.length-1})">← Review Answers</button>
+        <button class="btn blk" onclick="reQuiz('${modId}')">🔁 Retake Quiz</button>
+        <button class="btn out blk" onclick="renderDash();goTo('sd')">← Back to Modules</button>
+      </div>`;
+      completeTask(modId, 'quiz');
+      if (pct >= 80) celebrate();
+      return;
+    }
+    // Clamp cur to a valid question index (so "Review Answers" and boundary navigation work)
+    if (cur >= qs.length) cur = qs.length - 1;
+    if (cur < 0) cur = 0;
+
+    const q = qs[cur];
+    const already = ans[cur]; // null or {pickedIdx, ok}
+    const isLast = cur === qs.length - 1;
+
+    panel.innerHTML = `
+      <div style="padding:0 0 .5rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+          <span style="font-size:.78rem;color:var(--g400)">Question ${cur+1} of ${qs.length}</span>
+          <div class="qdots">${qs.map((_,i)=>`<div class="qd ${ans[i]?(ans[i].ok?'ok':'bad'):(i===cur?'done':'')}"></div>`).join('')}</div>
+        </div>
+        <div style="height:4px;background:var(--g100);border-radius:2px;overflow:hidden"><div style="height:100%;width:${(cur+1)/qs.length*100}%;background:linear-gradient(90deg,var(--lb),var(--teal));border-radius:2px"></div></div>
+      </div>
+      <div id="qrow" style="display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.75rem"></div>
+      <div id="qopts"></div>
+      <div id="qfb"></div>
+      <div class="navrow" style="display:flex;gap:.5rem;margin-top:1rem">
+        <button class="btn out" id="qPrev" style="flex:1" ${cur===0?'disabled':''}>← Previous</button>
+        <button class="btn" id="qNext" style="flex:1" ${!already?'disabled':''}>${isLast?'See Results ✓':'Next →'}</button>
+      </div>`;
+
+    const qrow = panel.querySelector('#qrow');
+    let qaBtn = null;
+    if (q.hasQAudio) {
+      qaBtn = document.createElement('button');
+      qaBtn.className = 'abtn'; qaBtn.style.cssText = 'width:34px;height:34px;font-size:.8rem;flex-shrink:0;margin-top:2px';
+      qaBtn.textContent = '▶';
+      qaBtn.onclick = () => speakText(q.qAudio, qaBtn);
+      qrow.appendChild(qaBtn);
+      // Only auto-play on first encounter (not when revisiting via Previous)
+      if (!already) setTimeout(() => speakText(q.qAudio, qaBtn), 300);
+    }
+    const qt = document.createElement('div');
+    qt.className = 'qtext'; qt.innerHTML = q.q; qrow.appendChild(qt);
+
+    const od = panel.querySelector('#qopts');
+    q.opts.forEach((opt, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'qopt-wrap';
+      if (q.hasOptAudio) {
+        const ab = document.createElement('button');
+        ab.className = 'abtn'; ab.style.cssText = 'width:30px;height:30px;font-size:.7rem;flex-shrink:0';
+        ab.textContent = '▶';
+        ab.onclick = e => { e.stopPropagation(); speakText(opt.spoken, ab); };
+        wrap.appendChild(ab);
+      }
+      const btn = document.createElement('button');
+      btn.className = 'qopt'; btn.style.flex = '1'; btn.innerHTML = opt.label;
+
+      if (already) {
+        // Revision mode — show locked state with picked answer and correct answer highlighted
+        btn.disabled = true;
+        if (i === already.pickedIdx) btn.classList.add(already.ok ? 'ok' : 'bad');
+        if (i === q.correct) btn.classList.add('ok');
+      } else {
+        btn.onclick = () => {
+          od.querySelectorAll('.qopt').forEach(b => b.disabled = true);
+          const ok = i === q.correct;
+          btn.classList.add(ok ? 'ok' : 'bad');
+          od.querySelectorAll('.qopt')[q.correct].classList.add('ok');
+          ans[cur] = { pickedIdx: i, ok };
+          panel.querySelector('#qfb').innerHTML = `<div class="qfb ${ok?'ok':'bad'}">${ok ? '✅ ' + enc() : '❌ ' + q.expl}</div>`;
+          if (!ok && q.hasOptAudio) setTimeout(() => speakText(q.opts[q.correct].spoken, null), 400);
+          // Enable Next button now that an answer is recorded
+          panel.querySelector('#qNext').disabled = false;
+        };
+      }
+      wrap.appendChild(btn); od.appendChild(wrap);
+    });
+
+    // If already answered, show the feedback for revision
+    if (already) {
+      panel.querySelector('#qfb').innerHTML = `<div class="qfb ${already.ok?'ok':'bad'}">${already.ok ? '✅ Correct!' : '❌ ' + q.expl}</div>`;
+    }
+
+    panel.querySelector('#qPrev').onclick = () => { if (cur > 0) { cur--; draw(); } };
+    panel.querySelector('#qNext').onclick = () => { cur++; draw(); };
+  }
+  // Expose a way to re-enter review mode from the completion card
+  window.reviewQuiz = idx => { cur = idx; draw(); };
+  draw();
+}
+window.reQuiz = id => { const p = document.querySelectorAll('.tp'); const last = p[p.length-1]; if(last){last.dataset.rendered='';renderQuiz(last, V[id], id);} };
+
+// ── AUDIO ENGINE ──────────────────────
+let _activeSpeechBtn = null;
+let _voicesReady = false;
+let _voicesList = [];
+let _voicesCallbacks = [];
+let _audioUnlocked = false;
+
+function _onVoicesReady(cb) {
+  if (_voicesReady) { cb(_voicesList); return; }
+  _voicesCallbacks.push(cb);
+}
+function _resolveVoices(list) {
+  if (_voicesReady) return;
+  _voicesReady = true; _voicesList = list;
+  _voicesCallbacks.forEach(fn => fn(list)); _voicesCallbacks = [];
+}
+function _initVoices() {
+  if (!('speechSynthesis' in window)) return;
+  const immediate = window.speechSynthesis.getVoices();
+  if (immediate.length > 0) { _resolveVoices(immediate); return; }
+  window.speechSynthesis.addEventListener('voiceschanged', () => {
+    const v = window.speechSynthesis.getVoices();
+    if (v.length > 0) _resolveVoices(v);
+  });
+  // Poll fallback — Samsung Internet & some Android browsers never fire voiceschanged
+  let tries = 0;
+  const poll = setInterval(() => {
+    const v = window.speechSynthesis.getVoices();
+    if (v.length > 0) { clearInterval(poll); _resolveVoices(v); return; }
+    if (++tries >= 50) { clearInterval(poll); _resolveVoices([]); }
+  }, 100);
+}
+_initVoices();
+
+// iOS Safari / Chrome on iOS / some Android browsers block speech synthesis
+// until it has been triggered by a direct user gesture. Play a silent utterance
+// on the very first tap anywhere on the page so that all subsequent speak()
+// calls — including programmatic ones (e.g. quiz auto-playback) — work.
+function _unlockAudio() {
+  if (_audioUnlocked) return;
+  _audioUnlocked = true;
+  if (!('speechSynthesis' in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance('');
+    u.volume = 0; u.rate = 1; u.pitch = 1;
+    window.speechSynthesis.speak(u);
+  } catch(e) { /* harmless */ }
+}
+// Listen for the first real user interaction anywhere on the page
+['touchstart','pointerdown','click','keydown'].forEach(ev => {
+  window.addEventListener(ev, _unlockAudio, { once: true, capture: true, passive: true });
+});
+
+function _getBestVoice(voices, langCode) {
+  const prefix = langCode.split('-')[0].toLowerCase();
+  return voices.find(v => v.lang === langCode)
+    || voices.find(v => v.lang.toLowerCase().startsWith(prefix))
+    // Malay fallback: Indonesian (id) is close and widely available on Android/Samsung
+    || (prefix === 'ms' ? voices.find(v => v.lang.toLowerCase().startsWith('id')) : null)
+    || null;
+}
+
+// Safari keep-alive: prevents speechSynthesis queue stalling after ~15s idle
+(function safariKeepAlive() {
+  if (!('speechSynthesis' in window)) return;
+  setInterval(() => {
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }
+  }, 10000);
+})();
+
+function speakText(txt, btn) {
+  if (!txt || !('speechSynthesis' in window)) return;
+  if (_activeSpeechBtn) { _activeSpeechBtn.classList.remove('playing'); _activeSpeechBtn = null; }
+  try { window.speechSynthesis.cancel(); } catch(e) {}
+  if (btn) { btn.classList.add('playing'); _activeSpeechBtn = btn; }
+  const langCode = lang === 'mandarin' ? 'zh-CN' : 'ms-MY';
+  const rate = lang === 'mandarin' ? 0.82 : 0.82;
+  _onVoicesReady(voices => {
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = langCode;
+    u.rate = rate;
+    u.pitch = 1;
+    u.volume = 1;
+    const voice = _getBestVoice(voices, langCode);
+    if (voice) u.voice = voice;
+    if (btn) {
+      u.onend = () => { if (_activeSpeechBtn === btn) { btn.classList.remove('playing'); _activeSpeechBtn = null; } };
+      u.onerror = e => {
+        if (_activeSpeechBtn === btn) { btn.classList.remove('playing'); _activeSpeechBtn = null; }
+        if (e.error && e.error !== 'interrupted' && e.error !== 'canceled') console.warn('TTS:', e.error);
+      };
+    }
+    // 80ms delay: fixes Edge silent-cancel bug and Safari pause issue
+    setTimeout(() => {
+      try {
+        if (window.speechSynthesis.paused) { try { window.speechSynthesis.resume(); } catch(e) {} }
+        window.speechSynthesis.speak(u);
+      } catch(err) {
+        console.warn('speak() failed:', err);
+        if (btn) { btn.classList.remove('playing'); _activeSpeechBtn = null; }
+      }
+    }, 80);
+  });
+}
+window.speak = (modId, idx, btn) => speakText(tgt(V[modId][idx]), btn);
+
+// ── CONFETTI ──────────────────────────
+function celebrate() {
+  const cc = document.getElementById('cc');
+  const cols = ['#19478C','#3EB3E1','#009CA2','#f59e0b','#22c55e'];
+  for (let i = 0; i < 45; i++) {
+    const p = document.createElement('div');
+    p.className = 'cp';
+    const c = cols[i % cols.length];
+    const sz = 6 + Math.random() * 8;
+    p.style.cssText = `left:${Math.random()*100}%;top:-10px;width:${sz}px;height:${sz}px;background:${c};border-radius:${Math.random()>.5?'50%':'2px'};animation-delay:${Math.random()*.5}s;animation-duration:${2+Math.random()}s`;
+    cc.appendChild(p);
+    setTimeout(() => p.remove(), 3000);
+  }
+}
+
+// ── UTILS ─────────────────────────────
+function shuffle(a) { for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const ENCS = ['Correct! Nice choice!','Well done!','Excellent!','Spot on!','Great recall!'];
+function enc() { return ENCS[Math.floor(Math.random()*ENCS.length)]; }
+</script>
+</body>
+</html>
